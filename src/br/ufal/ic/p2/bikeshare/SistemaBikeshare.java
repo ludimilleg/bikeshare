@@ -10,6 +10,8 @@ import java.io.Serializable;
 
 public class SistemaBikeshare implements Serializable {
 
+    private static final long serialVersionUID = 2656971213220932395L;
+
     private final RepositorioUsuarios usuarios = new RepositorioUsuarios();
 
     public String cadastrarPessoaFisica(String nome, String email, String senha,

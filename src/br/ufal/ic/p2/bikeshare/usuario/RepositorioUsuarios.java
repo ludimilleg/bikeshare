@@ -14,6 +14,8 @@ import java.util.function.Function;
 
 public class RepositorioUsuarios implements Serializable {
 
+    private static final long serialVersionUID = -1653459431383190735L;
+
     private final Map<String, Usuario> usuarios = new LinkedHashMap<>();
     private final GeradorId geradorId = new GeradorId("U");
 

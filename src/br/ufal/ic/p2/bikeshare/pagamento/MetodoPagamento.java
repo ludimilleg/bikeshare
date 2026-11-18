@@ -6,6 +6,8 @@ import java.io.Serializable;
 
 public abstract class MetodoPagamento implements Serializable {
 
+    private static final long serialVersionUID = 5911717227349826372L;
+
     public abstract String getNome();
 
     public String getAtributo(String atributo) {

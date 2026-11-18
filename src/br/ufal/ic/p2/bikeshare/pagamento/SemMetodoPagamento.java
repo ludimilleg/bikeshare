@@ -7,6 +7,8 @@ import br.ufal.ic.p2.bikeshare.exception.validacao.AtributoNaoExisteException;
 
 public class SemMetodoPagamento extends MetodoPagamento {
 
+    private static final long serialVersionUID = -1618774092255294777L;
+
     @Override
     public String getNome() {
         return "nenhum";
