@@ -8,7 +8,9 @@ import br.ufal.ic.p2.bikeshare.exception.usuario.UsuarioNaoEhPessoaFisicaExcepti
 import br.ufal.ic.p2.bikeshare.exception.usuario.UsuarioNaoEhPessoaJuridicaException;
 import br.ufal.ic.p2.bikeshare.exception.validacao.AtributoNaoExisteException;
 import br.ufal.ic.p2.bikeshare.pagamento.MetodoPagamento;
+import br.ufal.ic.p2.bikeshare.pagamento.PagamentoSaldoPreCarregado;
 import br.ufal.ic.p2.bikeshare.pagamento.SemMetodoPagamento;
+import br.ufal.ic.p2.bikeshare.plano.FabricaPlano;
 import br.ufal.ic.p2.bikeshare.plano.Plano;
 import br.ufal.ic.p2.bikeshare.util.Dinheiro;
 import br.ufal.ic.p2.bikeshare.util.Validador;
@@ -19,14 +21,17 @@ import java.util.regex.Pattern;
 
 public abstract class Usuario implements Serializable {
 
+    private static final long serialVersionUID = 4910641543355373962L;
+
     private static final Pattern PADRAO_EMAIL = Pattern.compile("^[^@\\s]+@[^@\\s]+$");
 
     private final String id;
-    private final String nome;
-    private final String email;
-    private final String senha;
-    private final Plano plano;
-    private final MetodoPagamento metodoPagamento;
+    private String nome;
+    private String email;
+    private String senha;
+    private Plano plano;
+    private MetodoPagamento metodoPagamento;
+    private PagamentoSaldoPreCarregado saldoPreCarregado;
     private final EstadoUsuario estado;
 
     protected Usuario(String id, String nome, String email, String senha, Plano plano) {
@@ -39,9 +44,42 @@ public abstract class Usuario implements Serializable {
         this.estado = EstadoUsuario.ATIVO;
     }
 
-    private static String validarEmail(String email) {
+    static String validarEmail(String email) {
         Validador.exigirTexto(email, EmailNuloException::new);
         return Validador.exigirFormato(email, PADRAO_EMAIL, EmailInvalidoException::new);
+    }
+
+    public void alterarNome(String nome) {
+        this.nome = Validador.exigirTexto(nome, NomeNuloException::new);
+    }
+
+    public void alterarSenha(String senha) {
+        this.senha = Validador.exigirTexto(senha, SenhaNulaException::new);
+    }
+
+    public void alterarPlano(String nome) {
+        if (!plano.getNome().equals(nome)) {
+            plano = FabricaPlano.criarComMensalidadePadrao(nome);
+        }
+    }
+
+    public void alterarMetodoPagamento(MetodoPagamento metodoPagamento) {
+        this.metodoPagamento = metodoPagamento;
+    }
+
+    public void ativarSaldoPreCarregado() {
+        if (saldoPreCarregado == null) {
+            saldoPreCarregado = new PagamentoSaldoPreCarregado();
+        }
+        metodoPagamento = saldoPreCarregado;
+    }
+
+    public void adicionarSaldo(String valor) {
+        metodoPagamento.adicionarSaldo(valor);
+    }
+
+    void alterarEmailValidado(String email) {
+        this.email = email;
     }
 
     public abstract TipoUsuario getTipo();

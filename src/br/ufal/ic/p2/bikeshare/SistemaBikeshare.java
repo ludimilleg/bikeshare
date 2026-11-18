@@ -1,8 +1,13 @@
 package br.ufal.ic.p2.bikeshare;
 
+import br.ufal.ic.p2.bikeshare.exception.validacao.AtributoNaoPodeSerAlteradoException;
+import br.ufal.ic.p2.bikeshare.exception.pagamento.ValorMetodoPagamentoInvalidoException;
+import br.ufal.ic.p2.bikeshare.pagamento.PagamentoCartao;
+import br.ufal.ic.p2.bikeshare.pagamento.PagamentoPix;
 import br.ufal.ic.p2.bikeshare.plano.FabricaPlano;
 import br.ufal.ic.p2.bikeshare.usuario.RepositorioUsuarios;
 import br.ufal.ic.p2.bikeshare.usuario.TipoUsuario;
+import br.ufal.ic.p2.bikeshare.usuario.Usuario;
 import br.ufal.ic.p2.bikeshare.usuario.UsuarioPessoaFisica;
 import br.ufal.ic.p2.bikeshare.usuario.UsuarioPessoaJuridica;
 
@@ -46,5 +51,60 @@ public class SistemaBikeshare implements Serializable {
 
     public String getUsuarioPorEmail(String email) {
         return usuarios.buscarPorEmail(email).getId();
+    }
+
+    public void alterarUsuario(String id, String atributo, String valor) {
+        Usuario usuario = usuarios.buscar(id);
+        if (atributo == null) {
+            throw new AtributoNaoPodeSerAlteradoException();
+        }
+        switch (atributo) {
+            case "nome":
+                usuario.alterarNome(valor);
+                break;
+            case "email":
+                usuarios.alterarEmail(usuario, valor);
+                break;
+            case "senha":
+                usuario.alterarSenha(valor);
+                break;
+            case "plano":
+                usuario.alterarPlano(valor);
+                break;
+            case "metodoPagamento":
+                if (!"saldoPreCarregado".equals(valor)) {
+                    throw new ValorMetodoPagamentoInvalidoException();
+                }
+                usuario.ativarSaldoPreCarregado();
+                break;
+            case "saldo":
+                usuario.adicionarSaldo(valor);
+                break;
+            default:
+                throw new AtributoNaoPodeSerAlteradoException();
+        }
+    }
+
+    public void alterarUsuario(String id, String atributo, String metodo,
+                               String numero, String validade) {
+        Usuario usuario = usuarios.buscar(id);
+        if (!"metodoPagamento".equals(atributo)) {
+            throw new AtributoNaoPodeSerAlteradoException();
+        }
+        if (!"cartao".equals(metodo)) {
+            throw new ValorMetodoPagamentoInvalidoException();
+        }
+        usuario.alterarMetodoPagamento(new PagamentoCartao(numero, validade));
+    }
+
+    public void alterarUsuario(String id, String atributo, String metodo, String chave) {
+        Usuario usuario = usuarios.buscar(id);
+        if (!"metodoPagamento".equals(atributo)) {
+            throw new AtributoNaoPodeSerAlteradoException();
+        }
+        if (!"pix".equals(metodo)) {
+            throw new ValorMetodoPagamentoInvalidoException();
+        }
+        usuario.alterarMetodoPagamento(new PagamentoPix(chave));
     }
 }
