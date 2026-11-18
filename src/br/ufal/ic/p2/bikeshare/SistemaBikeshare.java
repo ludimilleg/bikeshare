@@ -53,6 +53,10 @@ public class SistemaBikeshare implements Serializable {
         return usuarios.buscarPorEmail(email).getId();
     }
 
+    public void removerUsuario(String id) {
+        usuarios.remover(id);
+    }
+
     public void alterarUsuario(String id, String atributo, String valor) {
         Usuario usuario = usuarios.buscar(id);
         if (atributo == null) {
