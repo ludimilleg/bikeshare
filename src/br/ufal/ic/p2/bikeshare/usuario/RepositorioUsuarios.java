@@ -1,6 +1,7 @@
 package br.ufal.ic.p2.bikeshare.usuario;
 
 import br.ufal.ic.p2.bikeshare.exception.usuario.EmailJaCadastradoException;
+import br.ufal.ic.p2.bikeshare.exception.usuario.EmailNuloException;
 import br.ufal.ic.p2.bikeshare.exception.usuario.IdentificacaoUsuarioNulaException;
 import br.ufal.ic.p2.bikeshare.exception.usuario.UsuarioNaoExisteException;
 import br.ufal.ic.p2.bikeshare.util.GeradorId;
@@ -31,6 +32,14 @@ public class RepositorioUsuarios implements Serializable {
             throw new UsuarioNaoExisteException();
         }
         return usuario;
+    }
+
+    public Usuario buscarPorEmail(String email) {
+        Validador.exigirTexto(email, EmailNuloException::new);
+        return usuarios.values().stream()
+                .filter(usuario -> usuario.getEmail().equalsIgnoreCase(email))
+                .findFirst()
+                .orElseThrow(UsuarioNaoExisteException::new);
     }
 
     private void exigirEmailDisponivel(String email) {

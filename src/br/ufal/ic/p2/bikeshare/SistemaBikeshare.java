@@ -41,4 +41,8 @@ public class SistemaBikeshare implements Serializable {
     public String getAtributoUsuario(String usuario, String atributo) {
         return usuarios.buscar(usuario).getAtributo(atributo);
     }
+
+    public String getUsuarioPorEmail(String email) {
+        return usuarios.buscarPorEmail(email).getId();
+    }
 }

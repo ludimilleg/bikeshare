@@ -48,7 +48,7 @@ public class Facade {
     }
 
     public String getUsuarioPorEmail(String email) {
-        throw new UnsupportedOperationException(AINDA_NAO_IMPLEMENTADO);
+        return sistema.getUsuarioPorEmail(email);
     }
 
     // =====================================================================

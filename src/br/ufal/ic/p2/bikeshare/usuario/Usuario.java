@@ -14,6 +14,7 @@ import br.ufal.ic.p2.bikeshare.util.Dinheiro;
 import br.ufal.ic.p2.bikeshare.util.Validador;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.regex.Pattern;
 
 public abstract class Usuario implements Serializable {
@@ -76,6 +77,10 @@ public abstract class Usuario implements Serializable {
                 return plano.getNome();
             case "mensalidade":
                 return Dinheiro.formatar(plano.getMensalidade());
+            case "aluguelAtivo":
+                return "nenhum";
+            case "totalPendencias":
+                return Dinheiro.formatar(BigDecimal.ZERO);
             case "metodoPagamento":
                 return metodoPagamento.getNome();
             case "cpf":
@@ -84,6 +89,11 @@ public abstract class Usuario implements Serializable {
                 return getCnpj();
             case "razaoSocial":
                 return getRazaoSocial();
+            case "numeroCartao":
+            case "validadeCartao":
+            case "chavePix":
+            case "saldo":
+                return metodoPagamento.getAtributo(atributo);
             default:
                 throw new AtributoNaoExisteException();
         }
