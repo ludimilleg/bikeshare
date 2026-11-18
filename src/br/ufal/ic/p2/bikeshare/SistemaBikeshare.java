@@ -71,6 +71,15 @@ public class SistemaBikeshare implements Serializable {
             case "plano":
                 usuario.alterarPlano(valor);
                 break;
+            case "metodoPagamento":
+                if (!"saldoPreCarregado".equals(valor)) {
+                    throw new ValorMetodoPagamentoInvalidoException();
+                }
+                usuario.ativarSaldoPreCarregado();
+                break;
+            case "saldo":
+                usuario.adicionarSaldo(valor);
+                break;
             default:
                 throw new AtributoNaoPodeSerAlteradoException();
         }

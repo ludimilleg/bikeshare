@@ -8,6 +8,7 @@ import br.ufal.ic.p2.bikeshare.exception.usuario.UsuarioNaoEhPessoaFisicaExcepti
 import br.ufal.ic.p2.bikeshare.exception.usuario.UsuarioNaoEhPessoaJuridicaException;
 import br.ufal.ic.p2.bikeshare.exception.validacao.AtributoNaoExisteException;
 import br.ufal.ic.p2.bikeshare.pagamento.MetodoPagamento;
+import br.ufal.ic.p2.bikeshare.pagamento.PagamentoSaldoPreCarregado;
 import br.ufal.ic.p2.bikeshare.pagamento.SemMetodoPagamento;
 import br.ufal.ic.p2.bikeshare.plano.FabricaPlano;
 import br.ufal.ic.p2.bikeshare.plano.Plano;
@@ -30,6 +31,7 @@ public abstract class Usuario implements Serializable {
     private String senha;
     private Plano plano;
     private MetodoPagamento metodoPagamento;
+    private PagamentoSaldoPreCarregado saldoPreCarregado;
     private final EstadoUsuario estado;
 
     protected Usuario(String id, String nome, String email, String senha, Plano plano) {
@@ -63,6 +65,17 @@ public abstract class Usuario implements Serializable {
 
     public void alterarMetodoPagamento(MetodoPagamento metodoPagamento) {
         this.metodoPagamento = metodoPagamento;
+    }
+
+    public void ativarSaldoPreCarregado() {
+        if (saldoPreCarregado == null) {
+            saldoPreCarregado = new PagamentoSaldoPreCarregado();
+        }
+        metodoPagamento = saldoPreCarregado;
+    }
+
+    public void adicionarSaldo(String valor) {
+        metodoPagamento.adicionarSaldo(valor);
     }
 
     void alterarEmailValidado(String email) {
