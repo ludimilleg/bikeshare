@@ -60,7 +60,7 @@ public class Facade {
     }
 
     public void alterarUsuario(String usuario, String atributo, String valor1, String chave) {
-        throw new UnsupportedOperationException(AINDA_NAO_IMPLEMENTADO);
+        sistema.alterarUsuario(usuario, atributo, valor1, chave);
     }
 
     public void alterarUsuario(String usuario, String atributo, String valor1, String numero, String validade) {
