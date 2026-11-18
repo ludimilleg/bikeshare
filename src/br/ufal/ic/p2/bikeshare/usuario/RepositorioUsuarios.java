@@ -21,7 +21,7 @@ public class RepositorioUsuarios implements Serializable {
 
     public Usuario cadastrar(Function<String, Usuario> criador) {
         Usuario usuario = criador.apply(geradorId.proximo());
-        exigirEmailDisponivel(usuario.getEmail());
+        exigirEmailDisponivel(usuario.getEmail(), null);
         usuarios.put(usuario.getId(), usuario);
         geradorId.confirmarUso();
         return usuario;
@@ -44,9 +44,16 @@ public class RepositorioUsuarios implements Serializable {
                 .orElseThrow(UsuarioNaoExisteException::new);
     }
 
-    private void exigirEmailDisponivel(String email) {
+    public void alterarEmail(Usuario usuario, String email) {
+        String emailValidado = Usuario.validarEmail(email);
+        exigirEmailDisponivel(emailValidado, usuario.getId());
+        usuario.alterarEmailValidado(emailValidado);
+    }
+
+    private void exigirEmailDisponivel(String email, String idIgnorado) {
         boolean emUso = usuarios.values().stream()
-                .anyMatch(existente -> existente.getEmail().equalsIgnoreCase(email));
+                .anyMatch(existente -> !existente.getId().equals(idIgnorado)
+                        && existente.getEmail().equalsIgnoreCase(email));
         if (emUso) {
             throw new EmailJaCadastradoException();
         }

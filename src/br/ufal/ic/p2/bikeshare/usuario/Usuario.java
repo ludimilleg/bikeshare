@@ -19,12 +19,14 @@ import java.util.regex.Pattern;
 
 public abstract class Usuario implements Serializable {
 
+    private static final long serialVersionUID = 4910641543355373962L;
+
     private static final Pattern PADRAO_EMAIL = Pattern.compile("^[^@\\s]+@[^@\\s]+$");
 
     private final String id;
-    private final String nome;
-    private final String email;
-    private final String senha;
+    private String nome;
+    private String email;
+    private String senha;
     private final Plano plano;
     private final MetodoPagamento metodoPagamento;
     private final EstadoUsuario estado;
@@ -39,9 +41,21 @@ public abstract class Usuario implements Serializable {
         this.estado = EstadoUsuario.ATIVO;
     }
 
-    private static String validarEmail(String email) {
+    static String validarEmail(String email) {
         Validador.exigirTexto(email, EmailNuloException::new);
         return Validador.exigirFormato(email, PADRAO_EMAIL, EmailInvalidoException::new);
+    }
+
+    public void alterarNome(String nome) {
+        this.nome = Validador.exigirTexto(nome, NomeNuloException::new);
+    }
+
+    public void alterarSenha(String senha) {
+        this.senha = Validador.exigirTexto(senha, SenhaNulaException::new);
+    }
+
+    void alterarEmailValidado(String email) {
+        this.email = email;
     }
 
     public abstract TipoUsuario getTipo();
