@@ -1,5 +1,8 @@
 package br.ufal.ic.p2.bikeshare;
 
+import br.ufal.ic.p2.bikeshare.persistencia.ArmazenamentoSistema;
+import java.nio.file.Paths;
+
 /**
  Facade
  */
@@ -7,26 +10,33 @@ public class Facade {
 
     private static final String AINDA_NAO_IMPLEMENTADO = "Ainda não implementado.";
 
+    private static final String ARQUIVO_DADOS = "bikeshare_data.ser";
+
+    private final ArmazenamentoSistema armazenamento =
+            new ArmazenamentoSistema(Paths.get(ARQUIVO_DADOS));
+    
+            private SistemaBikeshare sistema = armazenamento.carregar();
+
     // =====================================================================
     // US1 - Cadastro de usuario
     // =====================================================================
 
     public String criarUsuario(String nome, String email, String senha, String tipo, String cpfOuCnpj) {
-        throw new UnsupportedOperationException(AINDA_NAO_IMPLEMENTADO);
+        return sistema.cadastrarPessoaFisica(nome, email, senha, tipo, cpfOuCnpj);
     }
 
     public String criarUsuario(String nome, String email, String senha, String tipo, String cnpj, String razaoSocial) {
-        throw new UnsupportedOperationException(AINDA_NAO_IMPLEMENTADO);
+        return sistema.cadastrarPessoaJuridica(nome, email, senha, tipo, cnpj, razaoSocial);
     }
 
     public String criarUsuario(String nome, String email, String senha, String tipo, String cpf,
                                 String plano, String mensalidade) {
-        throw new UnsupportedOperationException(AINDA_NAO_IMPLEMENTADO);
+        return sistema.cadastrarPessoaFisica(nome, email, senha, tipo, cpf, plano, mensalidade);
     }
 
     public String criarUsuario(String nome, String email, String senha, String tipo, String cnpj,
                                 String razaoSocial, String plano, String mensalidade) {
-        throw new UnsupportedOperationException(AINDA_NAO_IMPLEMENTADO);
+        return sistema.cadastrarPessoaJuridica(nome, email, senha, tipo, cnpj, razaoSocial, plano, mensalidade);
     }
 
     // =====================================================================
@@ -34,11 +44,11 @@ public class Facade {
     // =====================================================================
 
     public String getAtributoUsuario(String usuario, String atributo) {
-        throw new UnsupportedOperationException(AINDA_NAO_IMPLEMENTADO);
+        return sistema.getAtributoUsuario(usuario, atributo);
     }
 
     public String getUsuarioPorEmail(String email) {
-        throw new UnsupportedOperationException(AINDA_NAO_IMPLEMENTADO);
+        return sistema.getUsuarioPorEmail(email);
     }
 
     // =====================================================================
@@ -194,10 +204,10 @@ public class Facade {
     // =====================================================================
 
     public void zerarSistema() {
-        throw new UnsupportedOperationException(AINDA_NAO_IMPLEMENTADO);
+        sistema = new SistemaBikeshare();
     }
 
     public void encerrarSistema() {
-        throw new UnsupportedOperationException(AINDA_NAO_IMPLEMENTADO);
+        armazenamento.salvar(sistema);
     }
 }
