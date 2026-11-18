@@ -65,6 +65,9 @@ public class SistemaBikeshare implements Serializable {
             case "senha":
                 usuario.alterarSenha(valor);
                 break;
+            case "plano":
+                usuario.alterarPlano(valor);
+                break;
             default:
                 throw new AtributoNaoPodeSerAlteradoException();
         }

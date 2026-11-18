@@ -9,6 +9,7 @@ import br.ufal.ic.p2.bikeshare.exception.usuario.UsuarioNaoEhPessoaJuridicaExcep
 import br.ufal.ic.p2.bikeshare.exception.validacao.AtributoNaoExisteException;
 import br.ufal.ic.p2.bikeshare.pagamento.MetodoPagamento;
 import br.ufal.ic.p2.bikeshare.pagamento.SemMetodoPagamento;
+import br.ufal.ic.p2.bikeshare.plano.FabricaPlano;
 import br.ufal.ic.p2.bikeshare.plano.Plano;
 import br.ufal.ic.p2.bikeshare.util.Dinheiro;
 import br.ufal.ic.p2.bikeshare.util.Validador;
@@ -27,7 +28,7 @@ public abstract class Usuario implements Serializable {
     private String nome;
     private String email;
     private String senha;
-    private final Plano plano;
+    private Plano plano;
     private final MetodoPagamento metodoPagamento;
     private final EstadoUsuario estado;
 
@@ -52,6 +53,12 @@ public abstract class Usuario implements Serializable {
 
     public void alterarSenha(String senha) {
         this.senha = Validador.exigirTexto(senha, SenhaNulaException::new);
+    }
+
+    public void alterarPlano(String nome) {
+        if (!plano.getNome().equals(nome)) {
+            plano = FabricaPlano.criarComMensalidadePadrao(nome);
+        }
     }
 
     void alterarEmailValidado(String email) {
