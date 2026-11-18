@@ -29,7 +29,7 @@ public abstract class Usuario implements Serializable {
     private String email;
     private String senha;
     private Plano plano;
-    private final MetodoPagamento metodoPagamento;
+    private MetodoPagamento metodoPagamento;
     private final EstadoUsuario estado;
 
     protected Usuario(String id, String nome, String email, String senha, Plano plano) {
@@ -59,6 +59,10 @@ public abstract class Usuario implements Serializable {
         if (!plano.getNome().equals(nome)) {
             plano = FabricaPlano.criarComMensalidadePadrao(nome);
         }
+    }
+
+    public void alterarMetodoPagamento(MetodoPagamento metodoPagamento) {
+        this.metodoPagamento = metodoPagamento;
     }
 
     void alterarEmailValidado(String email) {

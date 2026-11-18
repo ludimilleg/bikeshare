@@ -1,6 +1,8 @@
 package br.ufal.ic.p2.bikeshare;
 
 import br.ufal.ic.p2.bikeshare.exception.validacao.AtributoNaoPodeSerAlteradoException;
+import br.ufal.ic.p2.bikeshare.exception.pagamento.ValorMetodoPagamentoInvalidoException;
+import br.ufal.ic.p2.bikeshare.pagamento.PagamentoCartao;
 import br.ufal.ic.p2.bikeshare.plano.FabricaPlano;
 import br.ufal.ic.p2.bikeshare.usuario.RepositorioUsuarios;
 import br.ufal.ic.p2.bikeshare.usuario.TipoUsuario;
@@ -71,5 +73,17 @@ public class SistemaBikeshare implements Serializable {
             default:
                 throw new AtributoNaoPodeSerAlteradoException();
         }
+    }
+
+    public void alterarUsuario(String id, String atributo, String metodo,
+                               String numero, String validade) {
+        Usuario usuario = usuarios.buscar(id);
+        if (!"metodoPagamento".equals(atributo)) {
+            throw new AtributoNaoPodeSerAlteradoException();
+        }
+        if (!"cartao".equals(metodo)) {
+            throw new ValorMetodoPagamentoInvalidoException();
+        }
+        usuario.alterarMetodoPagamento(new PagamentoCartao(numero, validade));
     }
 }
