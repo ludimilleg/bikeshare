@@ -36,6 +36,11 @@ public class RepositorioUsuarios implements Serializable {
         return usuario;
     }
 
+    public void remover(String id) {
+        Usuario usuario = buscar(id);
+        usuarios.remove(usuario.getId());
+    }
+
     public Usuario buscarPorEmail(String email) {
         Validador.exigirTexto(email, EmailNuloException::new);
         return usuarios.values().stream()
