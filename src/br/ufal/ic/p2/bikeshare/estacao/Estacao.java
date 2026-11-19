@@ -17,12 +17,14 @@ public class Estacao implements Serializable {
     private final String nome;
     private final String endereco;
     private final int capacidade;
+    private int bicicletasDisponiveis;
 
     public Estacao(String id, String nome, String endereco, String capacidade) {
         this.id = id;
         this.nome = Validador.exigirTexto(nome, NomeEstacaoNuloException::new);
         this.endereco = Validador.exigirTexto(endereco, EnderecoEstacaoNuloException::new);
         this.capacidade = validarCapacidade(capacidade);
+        this.bicicletasDisponiveis = 0;
     }
 
     private static int validarCapacidade(String capacidade) {
@@ -53,5 +55,13 @@ public class Estacao implements Serializable {
 
     public int getCapacidade() {
         return capacidade;
+    }
+
+    public int getVagasDisponiveis() {
+        return capacidade - bicicletasDisponiveis;
+    }
+
+    public int getBicicletasDisponiveis() {
+        return bicicletasDisponiveis;
     }
 }

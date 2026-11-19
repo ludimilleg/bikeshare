@@ -2,6 +2,7 @@ package br.ufal.ic.p2.bikeshare;
 
 import br.ufal.ic.p2.bikeshare.exception.validacao.AtributoNaoPodeSerAlteradoException;
 import br.ufal.ic.p2.bikeshare.exception.pagamento.ValorMetodoPagamentoInvalidoException;
+import br.ufal.ic.p2.bikeshare.estacao.RepositorioEstacoes;
 import br.ufal.ic.p2.bikeshare.pagamento.PagamentoCartao;
 import br.ufal.ic.p2.bikeshare.pagamento.PagamentoPix;
 import br.ufal.ic.p2.bikeshare.plano.FabricaPlano;
@@ -18,6 +19,14 @@ public class SistemaBikeshare implements Serializable {
     private static final long serialVersionUID = 2656971213220932395L;
 
     private final RepositorioUsuarios usuarios = new RepositorioUsuarios();
+    private RepositorioEstacoes estacoes;
+
+    private RepositorioEstacoes getEstacoes() {
+        if (estacoes == null) {
+            estacoes = new RepositorioEstacoes();
+        }
+        return estacoes;
+    }
 
     public String cadastrarPessoaFisica(String nome, String email, String senha,
                                         String tipo, String cpf) {
@@ -110,5 +119,17 @@ public class SistemaBikeshare implements Serializable {
             throw new ValorMetodoPagamentoInvalidoException();
         }
         usuario.alterarMetodoPagamento(new PagamentoPix(chave));
+    }
+
+    public String cadastrarEstacao(String nome, String endereco, String capacidade) {
+        return getEstacoes().cadastrar(nome, endereco, capacidade).getId();
+    }
+
+    public int getVagasDisponiveis(String estacao) {
+        return getEstacoes().buscar(estacao).getVagasDisponiveis();
+    }
+
+    public int getBicicletasDisponiveis(String estacao) {
+        return getEstacoes().buscar(estacao).getBicicletasDisponiveis();
     }
 }
