@@ -1,5 +1,7 @@
 package br.ufal.ic.p2.bikeshare;
 
+import br.ufal.ic.p2.bikeshare.bicicleta.Bicicleta;
+import br.ufal.ic.p2.bikeshare.bicicleta.RepositorioBicicletas;
 import br.ufal.ic.p2.bikeshare.exception.validacao.AtributoNaoPodeSerAlteradoException;
 import br.ufal.ic.p2.bikeshare.exception.pagamento.ValorMetodoPagamentoInvalidoException;
 import br.ufal.ic.p2.bikeshare.estacao.RepositorioEstacoes;
@@ -20,12 +22,20 @@ public class SistemaBikeshare implements Serializable {
 
     private final RepositorioUsuarios usuarios = new RepositorioUsuarios();
     private RepositorioEstacoes estacoes;
+    private RepositorioBicicletas bicicletas;
 
     private RepositorioEstacoes getEstacoes() {
         if (estacoes == null) {
             estacoes = new RepositorioEstacoes();
         }
         return estacoes;
+    }
+
+    private RepositorioBicicletas getBicicletas() {
+        if (bicicletas == null) {
+            bicicletas = new RepositorioBicicletas(getEstacoes());
+        }
+        return bicicletas;
     }
 
     public String cadastrarPessoaFisica(String nome, String email, String senha,
@@ -126,10 +136,30 @@ public class SistemaBikeshare implements Serializable {
     }
 
     public int getVagasDisponiveis(String estacao) {
-        return getEstacoes().buscar(estacao).getVagasDisponiveis();
+        return getBicicletas().getVagasDisponiveis(estacao);
     }
 
     public int getBicicletasDisponiveis(String estacao) {
-        return getEstacoes().buscar(estacao).getBicicletasDisponiveis();
+        return getBicicletas().getBicicletasDisponiveis(estacao);
+    }
+
+    public void adicionarBicicleta(String estacao, String bicicleta, String tipo) {
+        getBicicletas().cadastrar(estacao, bicicleta, tipo);
+    }
+
+    public void adicionarBicicleta(String estacao, String bicicleta, String tipo, String nivelBateria) {
+        getBicicletas().cadastrar(estacao, bicicleta, tipo, nivelBateria);
+    }
+
+    public void removerBicicleta(String estacao, String bicicleta) {
+        getBicicletas().remover(estacao, bicicleta);
+    }
+
+    public String getAtributoBicicleta(String bicicleta, String atributo) {
+        return getBicicletas().buscar(bicicleta).getAtributo(atributo);
+    }
+
+    public String getEstadoBicicleta(String bicicleta) {
+        return getBicicletas().buscar(bicicleta).getEstado();
     }
 }
