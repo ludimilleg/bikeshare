@@ -110,6 +110,10 @@ public abstract class Usuario implements Serializable {
 
     public abstract TipoUsuario getTipo();
 
+    public Plano getPlano() {
+        return plano;
+    }
+
     public String getCpf() {
         throw new UsuarioNaoEhPessoaFisicaException();
     }

@@ -22,4 +22,9 @@ public class PlanoAvulso extends Plano {
     public BigDecimal getMensalidade() {
         throw new PlanoNaoPossuiMensalidadeException();
     }
+
+    @Override
+    public BigDecimal calcularValor(long minutos) {
+        return new BigDecimal("0.50").multiply(BigDecimal.valueOf(minutos));
+    }
 }

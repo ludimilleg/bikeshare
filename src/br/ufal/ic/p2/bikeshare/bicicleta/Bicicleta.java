@@ -6,6 +6,7 @@ import br.ufal.ic.p2.bikeshare.exception.validacao.AtributoNaoExisteException;
 import br.ufal.ic.p2.bikeshare.util.Validador;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 public abstract class Bicicleta implements Serializable {
 
@@ -51,6 +52,10 @@ public abstract class Bicicleta implements Serializable {
     }
 
     public abstract String getTipo();
+
+    public BigDecimal getAdicionalPorMinuto() {
+        return BigDecimal.ZERO;
+    }
 
     public int getNivelBateria() {
         throw new BicicletaNaoPossuiBateriaException();

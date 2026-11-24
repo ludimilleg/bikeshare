@@ -31,4 +31,10 @@ public class PlanoAssinante extends Plano {
     public BigDecimal getMensalidade() {
         return mensalidade;
     }
+
+    @Override
+    public BigDecimal calcularValor(long minutos) {
+        long excedente = Math.max(0, minutos - 60);
+        return new BigDecimal("0.30").multiply(BigDecimal.valueOf(excedente));
+    }
 }
