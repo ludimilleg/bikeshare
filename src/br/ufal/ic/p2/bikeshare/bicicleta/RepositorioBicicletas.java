@@ -7,6 +7,7 @@ import br.ufal.ic.p2.bikeshare.exception.bicicleta.BicicletaNaoExisteException;
 import br.ufal.ic.p2.bikeshare.exception.bicicleta.BicicletaNaoEstaNestaEstacaoException;
 import br.ufal.ic.p2.bikeshare.exception.bicicleta.BicicletaNaoPossuiBateriaException;
 import br.ufal.ic.p2.bikeshare.exception.bicicleta.EstacaoSemVagasException;
+import br.ufal.ic.p2.bikeshare.exception.aluguel.EstacaoCheiaException;
 import br.ufal.ic.p2.bikeshare.exception.bicicleta.IdentificacaoBicicletaNulaException;
 import br.ufal.ic.p2.bikeshare.exception.validacao.TipoInvalidoException;
 import br.ufal.ic.p2.bikeshare.util.Validador;
@@ -101,6 +102,19 @@ public class RepositorioBicicletas implements Serializable {
         }
         bicicleta.exigirNivelParaRetirada();
         return bicicleta;
+    }
+
+    public void validarDevolucao(String estacaoId) {
+        Estacao estacao = estacoes.buscar(estacaoId);
+        if (contarOcupadas(estacaoId) >= estacao.getCapacidade()) {
+            throw new EstacaoCheiaException();
+        }
+    }
+
+    public void devolver(String estacaoId, String bicicletaId) {
+        validarDevolucao(estacaoId);
+        Bicicleta bicicleta = buscar(bicicletaId);
+        bicicleta.devolver(estacaoId);
     }
 
     public int getBicicletasDisponiveis(String estacaoId) {

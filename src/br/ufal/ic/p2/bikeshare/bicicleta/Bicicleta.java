@@ -33,6 +33,16 @@ public abstract class Bicicleta implements Serializable {
         this.estacaoId = null;
     }
 
+    public void devolver(String estacaoId) {
+        this.estado = "disponivel";
+        this.estacaoId = estacaoId;
+    }
+
+    public void enviarParaManutencao() {
+        this.estado = "emManutencao";
+        this.estacaoId = null;
+    }
+
     public void exigirNivelParaRetirada() {
     }
 

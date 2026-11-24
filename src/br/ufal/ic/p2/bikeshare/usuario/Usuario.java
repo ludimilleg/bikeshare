@@ -89,6 +89,10 @@ public abstract class Usuario implements Serializable {
         this.aluguelAtivoId = aluguelId;
     }
 
+    public void finalizarAluguel() {
+        this.aluguelAtivoId = null;
+    }
+
     public void validarMetodoPagamentoParaRetirada() {
         String nome = metodoPagamento.getNome();
         if ("nenhum".equals(nome)) {
