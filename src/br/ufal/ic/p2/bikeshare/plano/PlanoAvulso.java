@@ -3,6 +3,7 @@ package br.ufal.ic.p2.bikeshare.plano;
 import br.ufal.ic.p2.bikeshare.exception.plano.PlanoNaoPossuiMensalidadeException;
 
 import java.math.BigDecimal;
+import br.ufal.ic.p2.bikeshare.util.ConfiguracaoBikeshare;
 
 public class PlanoAvulso extends Plano {
 
@@ -25,6 +26,7 @@ public class PlanoAvulso extends Plano {
 
     @Override
     public BigDecimal calcularValor(long minutos) {
-        return new BigDecimal("0.50").multiply(BigDecimal.valueOf(minutos));
+        return ConfiguracaoBikeshare.TARIFA_AVULSO_POR_MINUTO
+                .multiply(BigDecimal.valueOf(minutos));
     }
 }

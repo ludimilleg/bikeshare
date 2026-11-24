@@ -5,6 +5,7 @@ import br.ufal.ic.p2.bikeshare.exception.bicicleta.NivelBateriaInsuficienteExcep
 import br.ufal.ic.p2.bikeshare.exception.bicicleta.NivelBateriaNaoNumericoException;
 import br.ufal.ic.p2.bikeshare.exception.bicicleta.NivelBateriaNuloException;
 import java.math.BigDecimal;
+import br.ufal.ic.p2.bikeshare.util.ConfiguracaoBikeshare;
 
 public class BicicletaEletrica extends Bicicleta {
 
@@ -44,17 +45,18 @@ public class BicicletaEletrica extends Bicicleta {
     }
 
     public boolean estaDisponivel() {
-        return super.estaDisponivel() && nivelBateria >= 15;
+        return super.estaDisponivel()
+                && nivelBateria >= ConfiguracaoBikeshare.BATERIA_MINIMA_DISPONIVEL;
     }
 
     public void exigirNivelParaRetirada() {
-        if (nivelBateria < 15) {
+        if (nivelBateria < ConfiguracaoBikeshare.BATERIA_MINIMA_DISPONIVEL) {
             throw new NivelBateriaInsuficienteException();
         }
     }
 
     @Override
     public BigDecimal getAdicionalPorMinuto() {
-        return new BigDecimal("0.20");
+        return ConfiguracaoBikeshare.ADICIONAL_ELETRICA_POR_MINUTO;
     }
 }

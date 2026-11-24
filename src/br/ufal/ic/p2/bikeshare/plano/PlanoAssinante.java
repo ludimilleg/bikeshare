@@ -5,6 +5,7 @@ import br.ufal.ic.p2.bikeshare.exception.plano.MensalidadeNegativaException;
 import br.ufal.ic.p2.bikeshare.exception.plano.MensalidadeNulaException;
 import br.ufal.ic.p2.bikeshare.util.Dinheiro;
 import br.ufal.ic.p2.bikeshare.util.Validador;
+import br.ufal.ic.p2.bikeshare.util.ConfiguracaoBikeshare;
 
 import java.math.BigDecimal;
 
@@ -34,7 +35,9 @@ public class PlanoAssinante extends Plano {
 
     @Override
     public BigDecimal calcularValor(long minutos) {
-        long excedente = Math.max(0, minutos - 60);
-        return new BigDecimal("0.30").multiply(BigDecimal.valueOf(excedente));
+        long excedente = Math.max(0,
+                minutos - ConfiguracaoBikeshare.FRANQUIA_ASSINANTE_MINUTOS);
+        return ConfiguracaoBikeshare.TARIFA_ASSINANTE_EXCEDENTE_POR_MINUTO
+                .multiply(BigDecimal.valueOf(excedente));
     }
 }

@@ -15,6 +15,7 @@ import br.ufal.ic.p2.bikeshare.plano.FabricaPlano;
 import br.ufal.ic.p2.bikeshare.plano.Plano;
 import br.ufal.ic.p2.bikeshare.util.Dinheiro;
 import br.ufal.ic.p2.bikeshare.util.Validador;
+import br.ufal.ic.p2.bikeshare.util.ConfiguracaoBikeshare;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -103,7 +104,8 @@ public abstract class Usuario implements Serializable {
 
     public void marcarInadimplente() {
         this.estado = EstadoUsuario.INADIMPLENTE;
-        this.totalPendencias = this.totalPendencias.add(new BigDecimal("10.00"));
+        this.totalPendencias = this.totalPendencias
+                .add(ConfiguracaoBikeshare.PENALIDADE_ATRASO);
         this.aluguelAtivoId = null;
     }
 

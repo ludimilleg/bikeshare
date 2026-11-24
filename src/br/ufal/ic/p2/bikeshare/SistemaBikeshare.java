@@ -18,6 +18,7 @@ import br.ufal.ic.p2.bikeshare.exception.aluguel.AluguelNaoEstaEmAndamentoExcept
 import br.ufal.ic.p2.bikeshare.exception.aluguel.DataDevolucaoAnteriorException;
 import br.ufal.ic.p2.bikeshare.bicicleta.Bicicleta;
 import br.ufal.ic.p2.bikeshare.exception.bicicleta.BicicletaNaoEstaNestaEstacaoException;
+import br.ufal.ic.p2.bikeshare.util.ConfiguracaoBikeshare;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -207,14 +208,15 @@ public class SistemaBikeshare implements Serializable {
         Bicicleta bicicleta = bicicletas.buscar(aluguel.getBicicletaId());
         long minutos = Duration.between(aluguel.getInicio(), fim).toMinutes();
 
-        if (minutos > 1440) {
+        if (minutos > ConfiguracaoBikeshare.TEMPO_MAXIMO_ALUGUEL_MINUTOS) {
             aluguel.expirar(estacaoId, fim);
             bicicletas.enviarParaManutencao(bicicleta.getId());
             usuario.marcarInadimplente();
             return;
         }
 
-        if (minutos <= 2 && estacaoId.equals(aluguel.getEstacaoOrigemId())) {
+        if (minutos <= ConfiguracaoBikeshare.PRAZO_CARENCIA_MINUTOS
+                && estacaoId.equals(aluguel.getEstacaoOrigemId())) {
             aluguel.cancelar(estacaoId, fim);
             bicicletas.devolver(estacaoId, bicicleta.getId());
             usuario.finalizarAluguel();
