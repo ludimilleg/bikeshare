@@ -1,48 +1,139 @@
 # Bikeshare | Programação 02
-O objetivo do BIKESHARE é construir, como projeto da disciplina de Programação 02, a lógica de negócio completa de um sistema de bicicletas compartilhadas, acessada por uma Facade e validada por testes de aceitação automatizados sem qualquer camada de interface gráfica ou de persistência em banco de dados.
+
+O objetivo do BIKESHARE é construir, como projeto da disciplina de **Programação Orientada a Objetos**, ministrada pelo professor **Mario Hozano** na **Universidade Federal de Alagoas (UFAL)**, a lógica de negócio completa de um sistema de bicicletas compartilhadas.
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/91018438/204195385-acc6fcd4-05a7-4f25-87d1-cb7d5cc5c852.png" alt="animated" />
 </p>
 
- ## Sobre o projeto
+## Sobre o projeto
 
-Assim como o WePayU tinha por propósito construir um sistema de folha de pagamento, o **BIKESHARE** tem por propósito construir um sistema de gerenciamento de um serviço de bicicletas compartilhadas (bike-sharing), no estilo dos sistemas usados em várias cidades brasileiras (ex.: Bike Itaú, Tembici).
+O Bikeshare gerencia usuarios, estações, bicicletas convencionais e elétricas e alugueis. O sistema permite cadastrar, consultar, alterar e remover usuários, cadastrar e consultar estações, adicionar e remover bicicletas, retirar e devolver bicicletas, calcular tarifas e manter o estado persistido entre execuções.
 
-O sistema mantém um cadastro de **usuários**, **estações** (pontos de retirada/devolução) e **bicicletas**. Um usuário retira uma bicicleta disponível em uma estação, usa-a por um período (um **aluguel**, também chamado de "corrida") e a devolve em qualquer estação com vaga livre. O sistema deve:
+O projeto foi desenvolvido sem interface gráfica e sem banco de dados. A lógica de negócio é acessada pela classe `Facade` e validada por scripts de aceitação com EasyAccept.
 
-- Controlar a disponibilidade de bicicletas em cada estação (bicicletas presentes × vagas livres);
-- Impedir a retirada de bicicletas indisponíveis (em uso, em manutenção) e de estações sem bicicletas;
-- Impedir a devolução em estações sem vagas;
-- Calcular o valor a cobrar por cada aluguel, de acordo com o **plano** do usuário (avulso ou assinante) e com a duração da corrida;
-- Impedir que um usuário **inadimplente** (com pendências financeiras) faça uma nova retirada;
-- Impedir que um usuário com um aluguel em andamento inicie um segundo aluguel simultâneo;
-- Registrar o histórico de aluguéis de cada usuário e gerar relatórios (faturamento, bicicletas disponíveis/alugadas);
-- Permitir desfazer/refazer operações (undo/redo);
-- Rodar de forma **totalmente desacoplada de interface gráfica** — assim como no WePayU, só será implementada a lógica de negócio, acessada por uma **Façade** e validada por scripts de teste de aceitação (EasyAccept).
+Principais recursos implementados no Milestone 1:
 
-Está dentro do escopo: cadastro, consulta, alteração e remoção de usuários e estações; gestão de bicicletas convencionais e elétricas; retirada e devolução de bicicletas, com cálculo de tarifa; planos de tarifação avulso, assinante e planos customizados criados em tempo de execução; regras de bloqueio por inadimplência, estação cheia ou vazia e bicicleta indisponível; lançamento e conclusão de manutenção; relatórios de disponibilidade e faturamento; desfazer/refazer operações; e persistência do estado do sistema entre execuções.
+- cadastro e consulta de usuários;
+- alteração e remoção de usuários;
+- cadastro e consulta de estações;
+- gerenciamento de bicicletas convencionais e elétricas;
+- retirada e devolução de bicicletas;
+- cálculo de tarifas;
+- planos avulso e assinante;
+- métodos de pagamento;
+- bloqueio por inadimplência;
+- persistência em arquivo.
 
-Está fora do escopo: qualquer interface gráfica ou web, integração com um gateway de pagamento real, geolocalização	e qualquer forma de concorrência.		
+## Estrutura do projeto
 
-## Glossário 
+- `src/br/ufal/ic/p2/bikeshare/` contém o código-fonte principal;
+- `src/br/ufal/ic/p2/bikeshare/Facade.java` é o ponto de entrada dos testes;
+- `src/br/ufal/ic/p2/bikeshare/SistemaBikeshare.java` coordena os repositórios;
+- `src/br/ufal/ic/p2/bikeshare/usuario/` contém usuários e regras relacionadas;
+- `src/br/ufal/ic/p2/bikeshare/estacao/` contém estações;
+- `src/br/ufal/ic/p2/bikeshare/bicicleta/` contém bicicletas e repositórios;
+- `src/br/ufal/ic/p2/bikeshare/aluguel/` contém alugueis e o serviço de aluguel;
+- `src/br/ufal/ic/p2/bikeshare/plano/` e `pagamento/` concentram regras polimórficas;
+- `tests/` contém os scripts de aceitação;
+- `lib/easyaccept.jar` contém a biblioteca de testes.
 
-| Termo | Definição |
-|---|---|
-| **Usuário** | Pessoa cadastrada no sistema, identificada por um identificador único gerado automaticamente. Pode alugar bicicletas. |
-| **Estação** | Ponto físico com um número fixo de vagas (`capacidade`), onde bicicletas ficam disponíveis para retirada e podem ser devolvidas. |
-| **Bicicleta** | Veículo compartilhado, identificado unicamente, que pertence a uma estação enquanto não está em uso. |
-| **Vaga** | Espaço disponível em uma estação para receber uma bicicleta. `vagas livres = capacidade − bicicletas presentes`. |
-| **Aluguel (ou corrida)** | Período de uso de uma bicicleta por um usuário, do momento da retirada até a devolução. |
-| **Plano** | Modalidade de cobrança contratada pelo usuário: *avulso* (paga por minuto/hora a cada corrida) ou *assinante* (paga mensalidade e tem franquia de minutos gratuitos). |
-| **Tarifa** | Valor cobrado por um aluguel, calculado de acordo com o plano do usuário e a duração da corrida. |
-| **Penalidade / taxa extra** | Cobrança adicional lançada sobre um usuário (ex.: atraso na devolução, dano à bicicleta, devolução fora da área de cobertura). Análoga à "taxa de serviço" do sindicato no WePayU. |
-| **Inadimplência** | Situação de um usuário que possui pendências financeiras não quitadas; nesse estado, não pode iniciar novos aluguéis. |
-| **Estado da bicicleta** | Condição operacional da bicicleta: disponível, em uso, em manutenção ou removida. |
-| **Estado do aluguel** | Condição de uma corrida: em andamento, finalizada, cancelada ou expirada. |
-| **Bicicleta convencional / elétrica** | Os dois tipos fixos de bicicleta suportados pelo sistema; a elétrica possui nível de bateria e cobrança adicional por minuto. |
-| **Usuário pessoa física / jurídica** | Os dois tipos fixos de usuário; pessoa física se identifica por CPF, pessoa jurídica por CNPJ/razão social e pode ter fatura consolidada. |
-| **Método de pagamento** | Forma pela qual o usuário paga suas cobranças: cartão, Pix ou saldo pré-carregado. |
+## Requisitos
 
----
+- Java JDK 11 ou superior;
+- terminal PowerShell, CMD, Bash ou Zsh;
+- acesso aos arquivos `lib/easyaccept.jar` e `tests/`.
 
+No diretório raiz do projeto, execute os comandos a partir da pasta que contém `src/`, `tests/` e `lib/`.
+
+## Como executar no Windows
+
+No PowerShell:
+
+```powershell
+Remove-Item -Recurse -Force out -ErrorAction SilentlyContinue
+New-Item -ItemType Directory out
+$sources = Get-ChildItem src -Recurse -Filter *.java | ForEach-Object { $_.FullName }
+javac -cp "lib\easyaccept.jar" -d out $sources
+
+java -cp "out;lib\easyaccept.jar" easyaccept.EasyAccept br.ufal.ic.p2.bikeshare.Facade tests/us1.txt
+```
+
+Para executar outro script de aceitação:
+
+```powershell
+java -cp "out;lib\easyaccept.jar" easyaccept.EasyAccept br.ufal.ic.p2.bikeshare.Facade tests/us9.txt
+```
+
+Os scripts terminados em `_1.txt` devem ser executados depois do script base correspondente, sem apagar `bikeshare_data.ser` entre eles. Por exemplo:
+
+```powershell
+java -cp "out;lib\easyaccept.jar" easyaccept.EasyAccept br.ufal.ic.p2.bikeshare.Facade tests/us1.txt
+java -cp "out;lib\easyaccept.jar" easyaccept.EasyAccept br.ufal.ic.p2.bikeshare.Facade tests/us1_1.txt
+```
+
+Antes de uma validação isolada, apague o arquivo de persistência existente:
+
+```powershell
+Remove-Item bikeshare_data.ser -ErrorAction SilentlyContinue
+```
+
+## Como executar no Linux
+
+No terminal:
+
+```bash
+rm -rf out bikeshare_data.ser
+mkdir out
+javac -cp "lib/easyaccept.jar" -d out $(find src -name "*.java")
+
+java -cp "out:lib/easyaccept.jar" easyaccept.EasyAccept br.ufal.ic.p2.bikeshare.Facade tests/us1.txt
+```
+
+Para outro script:
+
+```bash
+java -cp "out:lib/easyaccept.jar" easyaccept.EasyAccept br.ufal.ic.p2.bikeshare.Facade tests/us9.txt
+```
+
+Exemplo de execução persistida:
+
+```bash
+rm -rf bikeshare_data.ser
+java -cp "out:lib/easyaccept.jar" easyaccept.EasyAccept br.ufal.ic.p2.bikeshare.Facade tests/us1.txt
+java -cp "out:lib/easyaccept.jar" easyaccept.EasyAccept br.ufal.ic.p2.bikeshare.Facade tests/us1_1.txt
+```
+
+Não apague `bikeshare_data.ser` entre o script base e o script `_1` correspondente.
+
+## Como executar no macOS
+
+No Terminal, use os mesmos comandos do Linux:
+
+```bash
+rm -rf out bikeshare_data.ser
+mkdir out
+javac -cp "lib/easyaccept.jar" -d out $(find src -name "*.java")
+
+java -cp "out:lib/easyaccept.jar" easyaccept.EasyAccept br.ufal.ic.p2.bikeshare.Facade tests/us1.txt
+```
+
+Para executar mais testes:
+
+```bash
+java -cp "out:lib/easyaccept.jar" easyaccept.EasyAccept br.ufal.ic.p2.bikeshare.Facade tests/us9.txt
+```
+
+## Scripts disponíveis
+
+Os scripts usam o padrão `tests/usX.txt` e `tests/usX_1.txt`. Os primeiros scripts cobrem:
+
+- US1: cadastro de usuários;
+- US2: consulta de usuários;
+- US3: alteração de usuários;
+- US4: remoção de usuários;
+- US5: cadastro de estações;
+- US6: gerenciamento de bicicletas;
+- US7: consulta de disponibilidade;
+- US8: retirada de bicicletas;
+- US9: devolução de bicicletas.
