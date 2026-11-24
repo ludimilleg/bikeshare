@@ -4,7 +4,7 @@ import br.ufal.ic.p2.bikeshare.exception.estacao.CapacidadeEstacaoNaoNumericaExc
 import br.ufal.ic.p2.bikeshare.exception.estacao.CapacidadeEstacaoNaoPositivaException;
 import br.ufal.ic.p2.bikeshare.exception.estacao.CapacidadeEstacaoNulaException;
 import br.ufal.ic.p2.bikeshare.exception.estacao.EnderecoEstacaoNuloException;
-import br.ufal.ic.p2.bikeshare.exception.estacao.NomeEstacaoNuloException;
+import br.ufal.ic.p2.bikeshare.exception.validacao.NomeNuloException;
 import br.ufal.ic.p2.bikeshare.util.Validador;
 
 import java.io.Serializable;
@@ -20,7 +20,7 @@ public class Estacao implements Serializable {
 
     public Estacao(String id, String nome, String endereco, String capacidade) {
         this.id = id;
-        this.nome = Validador.exigirTexto(nome, NomeEstacaoNuloException::new);
+        this.nome = Validador.exigirTexto(nome, NomeNuloException::new);
         this.endereco = Validador.exigirTexto(endereco, EnderecoEstacaoNuloException::new);
         this.capacidade = validarCapacidade(capacidade);
     }
@@ -53,13 +53,5 @@ public class Estacao implements Serializable {
 
     public int getCapacidade() {
         return capacidade;
-    }
-
-    public int getVagasDisponiveis() {
-        return capacidade;
-    }
-
-    public int getBicicletasDisponiveis() {
-        return 0;
     }
 }

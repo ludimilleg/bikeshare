@@ -5,11 +5,9 @@ import br.ufal.ic.p2.bikeshare.estacao.RepositorioEstacoes;
 import br.ufal.ic.p2.bikeshare.exception.bicicleta.BicicletaJaExisteException;
 import br.ufal.ic.p2.bikeshare.exception.bicicleta.BicicletaNaoExisteException;
 import br.ufal.ic.p2.bikeshare.exception.bicicleta.BicicletaNaoEstaNestaEstacaoException;
-import br.ufal.ic.p2.bikeshare.exception.bicicleta.BicicletaNaoPossuiBateriaException;
 import br.ufal.ic.p2.bikeshare.exception.bicicleta.EstacaoSemVagasException;
 import br.ufal.ic.p2.bikeshare.exception.aluguel.EstacaoCheiaException;
 import br.ufal.ic.p2.bikeshare.exception.bicicleta.IdentificacaoBicicletaNulaException;
-import br.ufal.ic.p2.bikeshare.exception.validacao.TipoInvalidoException;
 import br.ufal.ic.p2.bikeshare.util.Validador;
 
 import java.io.Serializable;
@@ -43,17 +41,8 @@ public class RepositorioBicicletas implements Serializable {
             throw new BicicletaJaExisteException();
         }
 
-        Bicicleta bicicleta;
-        if ("convencional".equals(tipo)) {
-            if (nivelBateria != null) {
-                throw new BicicletaNaoPossuiBateriaException();
-            }
-            bicicleta = new BicicletaConvencional(bicicletaId, estacaoId);
-        } else if ("eletrica".equals(tipo)) {
-            bicicleta = new BicicletaEletrica(bicicletaId, estacaoId, nivelBateria);
-        } else {
-            throw new TipoInvalidoException();
-        }
+        Bicicleta bicicleta = FabricaBicicleta.criar(
+                tipo, bicicletaId, estacaoId, nivelBateria);
 
         if (contarOcupadas(estacaoId) >= estacao.getCapacidade()) {
             throw new EstacaoSemVagasException();
@@ -93,17 +82,6 @@ public class RepositorioBicicletas implements Serializable {
         return bicicleta;
     }
 
-    public Bicicleta validarRetirada(String estacaoId, String bicicletaId) {
-        Estacao estacao = estacoes.buscar(estacaoId);
-        Bicicleta bicicleta = buscar(bicicletaId);
-        if (bicicleta.getEstacaoId() == null
-                || !bicicleta.getEstacaoId().equals(estacao.getId())) {
-            throw new BicicletaNaoEstaNestaEstacaoException();
-        }
-        bicicleta.exigirNivelParaRetirada();
-        return bicicleta;
-    }
-
     public void validarDevolucao(String estacaoId) {
         Estacao estacao = estacoes.buscar(estacaoId);
         if (contarOcupadas(estacaoId) >= estacao.getCapacidade()) {
@@ -112,7 +90,6 @@ public class RepositorioBicicletas implements Serializable {
     }
 
     public void devolver(String estacaoId, String bicicletaId) {
-        validarDevolucao(estacaoId);
         Bicicleta bicicleta = buscar(bicicletaId);
         bicicleta.devolver(estacaoId);
     }

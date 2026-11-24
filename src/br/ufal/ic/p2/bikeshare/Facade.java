@@ -1,6 +1,7 @@
 package br.ufal.ic.p2.bikeshare;
 
 import br.ufal.ic.p2.bikeshare.persistencia.ArmazenamentoSistema;
+
 import java.nio.file.Paths;
 
 /**
@@ -14,8 +15,8 @@ public class Facade {
 
     private final ArmazenamentoSistema armazenamento =
             new ArmazenamentoSistema(Paths.get(ARQUIVO_DADOS));
-    
-            private SistemaBikeshare sistema = armazenamento.carregar();
+
+    private SistemaBikeshare sistema = armazenamento.carregar();
 
     // =====================================================================
     // US1 - Cadastro de usuario
@@ -108,11 +109,11 @@ public class Facade {
     // =====================================================================
 
     public String getBicicletasDisponiveis(String estacao) {
-        return String.valueOf(sistema.getBicicletasDisponiveis(estacao));
+        return sistema.getBicicletasDisponiveis(estacao);
     }
 
     public String getVagasDisponiveis(String estacao) {
-        return String.valueOf(sistema.getVagasDisponiveis(estacao));
+        return sistema.getVagasDisponiveis(estacao);
     }
 
     public String getEstadoBicicleta(String bicicleta) {

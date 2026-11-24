@@ -4,6 +4,7 @@ import br.ufal.ic.p2.bikeshare.exception.pagamento.UsuarioNaoUsaCartaoException;
 import br.ufal.ic.p2.bikeshare.exception.pagamento.UsuarioNaoUsaPixException;
 import br.ufal.ic.p2.bikeshare.exception.pagamento.UsuarioNaoUsaSaldoPreCarregadoException;
 import br.ufal.ic.p2.bikeshare.exception.validacao.AtributoNaoExisteException;
+import br.ufal.ic.p2.bikeshare.exception.aluguel.MetodoPagamentoNaoCadastradoException;
 
 public class SemMetodoPagamento extends MetodoPagamento {
 
@@ -27,5 +28,10 @@ public class SemMetodoPagamento extends MetodoPagamento {
             default:
                 throw new AtributoNaoExisteException();
         }
+    }
+
+    @Override
+    public void validarMetodoPagamentoParaRetirada() {
+        throw new MetodoPagamentoNaoCadastradoException();
     }
 }
