@@ -18,10 +18,6 @@ public class PagamentoSaldoPreCarregado extends MetodoPagamento {
 
     private BigDecimal saldo = BigDecimal.ZERO;
 
-    public boolean possuiSaldo() {
-        return saldo.signum() > 0;
-    }
-
     public boolean possuiSaldo(BigDecimal valor) {
         return saldo.compareTo(valor) >= 0;
     }
@@ -35,7 +31,7 @@ public class PagamentoSaldoPreCarregado extends MetodoPagamento {
 
     @Override
     public void validarMetodoPagamentoParaRetirada() {
-        if (!possuiSaldo()) {
+        if (saldo.signum() <= 0) {
             throw new SaldoInsuficienteException();
         }
     }

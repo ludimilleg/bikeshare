@@ -54,12 +54,4 @@ public class Estacao implements Serializable {
     public int getCapacidade() {
         return capacidade;
     }
-
-    public int getVagasDisponiveis() {
-        return capacidade;
-    }
-
-    public int getBicicletasDisponiveis() {
-        return 0;
-    }
 }
