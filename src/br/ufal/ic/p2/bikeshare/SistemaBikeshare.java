@@ -29,30 +29,9 @@ public class SistemaBikeshare implements Serializable {
     private static final long serialVersionUID = 2656971213220932395L;
 
     private final RepositorioUsuarios usuarios = new RepositorioUsuarios();
-    private RepositorioEstacoes estacoes;
-    private RepositorioBicicletas bicicletas;
-    private RepositorioAlugueis alugueis;
-
-    private RepositorioEstacoes getEstacoes() {
-        if (estacoes == null) {
-            estacoes = new RepositorioEstacoes();
-        }
-        return estacoes;
-    }
-
-    private RepositorioBicicletas getBicicletas() {
-        if (bicicletas == null) {
-            bicicletas = new RepositorioBicicletas(getEstacoes());
-        }
-        return bicicletas;
-    }
-
-    private RepositorioAlugueis getAlugueis() {
-        if (alugueis == null) {
-            alugueis = new RepositorioAlugueis();
-        }
-        return alugueis;
-    }
+    private final RepositorioEstacoes estacoes = new RepositorioEstacoes();
+    private final RepositorioBicicletas bicicletas = new RepositorioBicicletas(estacoes);
+    private final RepositorioAlugueis alugueis = new RepositorioAlugueis();
 
     public String cadastrarPessoaFisica(String nome, String email, String senha,
                                         String tipo, String cpf) {
@@ -148,64 +127,64 @@ public class SistemaBikeshare implements Serializable {
     }
 
     public String cadastrarEstacao(String nome, String endereco, String capacidade) {
-        return getEstacoes().cadastrar(nome, endereco, capacidade).getId();
+        return estacoes.cadastrar(nome, endereco, capacidade).getId();
     }
 
     public int getVagasDisponiveis(String estacao) {
-        return getBicicletas().getVagasDisponiveis(estacao);
+        return bicicletas.getVagasDisponiveis(estacao);
     }
 
     public int getBicicletasDisponiveis(String estacao) {
-        return getBicicletas().getBicicletasDisponiveis(estacao);
+        return bicicletas.getBicicletasDisponiveis(estacao);
     }
 
     public void adicionarBicicleta(String estacao, String bicicleta, String tipo) {
-        getBicicletas().cadastrar(estacao, bicicleta, tipo);
+        bicicletas.cadastrar(estacao, bicicleta, tipo);
     }
 
     public void adicionarBicicleta(String estacao, String bicicleta, String tipo, String nivelBateria) {
-        getBicicletas().cadastrar(estacao, bicicleta, tipo, nivelBateria);
+        bicicletas.cadastrar(estacao, bicicleta, tipo, nivelBateria);
     }
 
     public void removerBicicleta(String estacao, String bicicleta) {
-        getBicicletas().remover(estacao, bicicleta);
+        bicicletas.remover(estacao, bicicleta);
     }
 
     public String getAtributoBicicleta(String bicicleta, String atributo) {
-        return getBicicletas().buscar(bicicleta).getAtributo(atributo);
+        return bicicletas.buscar(bicicleta).getAtributo(atributo);
     }
 
     public String getEstadoBicicleta(String bicicleta) {
-        return getBicicletas().buscar(bicicleta).getEstado();
+        return bicicletas.buscar(bicicleta).getEstado();
     }
 
     public String retirarBicicleta(String usuarioId, String estacaoId,
                                    String bicicletaId, String data) {
         Usuario usuario = usuarios.buscar(usuarioId);
-        getEstacoes().buscar(estacaoId);
-        getBicicletas().buscar(bicicletaId);
+        estacoes.buscar(estacaoId);
+        bicicletas.buscar(bicicletaId);
         Aluguel.exigirDataValida(data);
         if (usuario.getAluguelAtivoId() != null) {
             throw new UsuarioJaPossuiAluguelException();
         }
 
-        getBicicletas().validarRetirada(estacaoId, bicicletaId);
+        bicicletas.validarRetirada(estacaoId, bicicletaId);
         usuario.validarMetodoPagamentoParaRetirada();
-        getBicicletas().retirar(estacaoId, bicicletaId);
+        bicicletas.retirar(estacaoId, bicicletaId);
 
-        Aluguel aluguel = getAlugueis().cadastrar(
+        Aluguel aluguel = alugueis.cadastrar(
                 usuarioId, bicicletaId, estacaoId, data);
         usuario.iniciarAluguel(aluguel.getId());
         return aluguel.getId();
     }
 
     public String getAtributoAluguel(String aluguelId, String atributo) {
-        return getAlugueis().buscar(aluguelId).getAtributo(atributo);
+        return alugueis.buscar(aluguelId).getAtributo(atributo);
     }
 
     public void devolverBicicleta(String aluguelId, String estacaoId, String data) {
-        Aluguel aluguel = getAlugueis().buscar(aluguelId);
-        getEstacoes().buscar(estacaoId);
+        Aluguel aluguel = alugueis.buscar(aluguelId);
+        estacoes.buscar(estacaoId);
         Aluguel.exigirDataValida(data);
 
         if (!"emAndamento".equals(aluguel.getEstado())) {
@@ -217,22 +196,22 @@ public class SistemaBikeshare implements Serializable {
             throw new DataDevolucaoAnteriorException();
         }
 
-        getBicicletas().validarDevolucao(estacaoId);
+        bicicletas.validarDevolucao(estacaoId);
 
         Usuario usuario = usuarios.buscar(aluguel.getUsuarioId());
-        Bicicleta bicicleta = getBicicletas().buscar(aluguel.getBicicletaId());
+        Bicicleta bicicleta = bicicletas.buscar(aluguel.getBicicletaId());
         long minutos = Duration.between(aluguel.getInicio(), fim).toMinutes();
 
         if (minutos > 1440) {
             aluguel.expirar(estacaoId, fim);
-            getBicicletas().enviarParaManutencao(bicicleta.getId());
+            bicicletas.enviarParaManutencao(bicicleta.getId());
             usuario.marcarInadimplente();
             return;
         }
 
         if (minutos <= 2 && estacaoId.equals(aluguel.getEstacaoOrigemId())) {
             aluguel.cancelar(estacaoId, fim);
-            getBicicletas().devolver(estacaoId, bicicleta.getId());
+            bicicletas.devolver(estacaoId, bicicleta.getId());
             usuario.finalizarAluguel();
             return;
         }
@@ -243,7 +222,7 @@ public class SistemaBikeshare implements Serializable {
         usuario.validarSaldo(valor);
         usuario.cobrar(valor);
         aluguel.finalizar(estacaoId, fim, valor);
-        getBicicletas().devolver(estacaoId, bicicleta.getId());
+        bicicletas.devolver(estacaoId, bicicleta.getId());
         usuario.finalizarAluguel();
     }
 }
