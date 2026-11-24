@@ -15,8 +15,14 @@ import br.ufal.ic.p2.bikeshare.usuario.TipoUsuario;
 import br.ufal.ic.p2.bikeshare.usuario.Usuario;
 import br.ufal.ic.p2.bikeshare.usuario.UsuarioPessoaFisica;
 import br.ufal.ic.p2.bikeshare.usuario.UsuarioPessoaJuridica;
+import br.ufal.ic.p2.bikeshare.exception.aluguel.AluguelNaoEstaEmAndamentoException;
+import br.ufal.ic.p2.bikeshare.exception.aluguel.DataDevolucaoAnteriorException;
+import br.ufal.ic.p2.bikeshare.bicicleta.Bicicleta;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 public class SistemaBikeshare implements Serializable {
 
@@ -195,5 +201,49 @@ public class SistemaBikeshare implements Serializable {
 
     public String getAtributoAluguel(String aluguelId, String atributo) {
         return getAlugueis().buscar(aluguelId).getAtributo(atributo);
+    }
+
+    public void devolverBicicleta(String aluguelId, String estacaoId, String data) {
+        Aluguel aluguel = getAlugueis().buscar(aluguelId);
+        getEstacoes().buscar(estacaoId);
+        Aluguel.exigirDataValida(data);
+
+        if (!"emAndamento".equals(aluguel.getEstado())) {
+            throw new AluguelNaoEstaEmAndamentoException();
+        }
+
+        LocalDateTime fim = Aluguel.lerData(data);
+        if (fim.isBefore(aluguel.getInicio())) {
+            throw new DataDevolucaoAnteriorException();
+        }
+
+        getBicicletas().validarDevolucao(estacaoId);
+
+        Usuario usuario = usuarios.buscar(aluguel.getUsuarioId());
+        Bicicleta bicicleta = getBicicletas().buscar(aluguel.getBicicletaId());
+        long minutos = Duration.between(aluguel.getInicio(), fim).toMinutes();
+
+        if (minutos > 1440) {
+            aluguel.expirar(estacaoId, fim);
+            getBicicletas().enviarParaManutencao(bicicleta.getId());
+            usuario.marcarInadimplente();
+            return;
+        }
+
+        if (minutos <= 2 && estacaoId.equals(aluguel.getEstacaoOrigemId())) {
+            aluguel.cancelar(estacaoId, fim);
+            getBicicletas().devolver(estacaoId, bicicleta.getId());
+            usuario.finalizarAluguel();
+            return;
+        }
+
+        BigDecimal valor = usuario.getPlano().calcularValor(minutos)
+                .add(bicicleta.getAdicionalPorMinuto().multiply(BigDecimal.valueOf(minutos)));
+
+        usuario.validarSaldo(valor);
+        usuario.cobrar(valor);
+        aluguel.finalizar(estacaoId, fim, valor);
+        getBicicletas().devolver(estacaoId, bicicleta.getId());
+        usuario.finalizarAluguel();
     }
 }

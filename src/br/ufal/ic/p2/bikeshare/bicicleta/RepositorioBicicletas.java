@@ -117,6 +117,10 @@ public class RepositorioBicicletas implements Serializable {
         bicicleta.devolver(estacaoId);
     }
 
+    public void enviarParaManutencao(String bicicletaId) {
+        buscar(bicicletaId).enviarParaManutencao();
+    }
+
     public int getBicicletasDisponiveis(String estacaoId) {
         Estacao estacao = estacoes.buscar(estacaoId);
         return (int) bicicletas.values().stream()

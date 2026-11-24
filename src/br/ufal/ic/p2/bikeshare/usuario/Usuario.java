@@ -12,6 +12,7 @@ import br.ufal.ic.p2.bikeshare.pagamento.PagamentoSaldoPreCarregado;
 import br.ufal.ic.p2.bikeshare.pagamento.SemMetodoPagamento;
 import br.ufal.ic.p2.bikeshare.exception.aluguel.MetodoPagamentoNaoCadastradoException;
 import br.ufal.ic.p2.bikeshare.exception.aluguel.SaldoInsuficienteException;
+import br.ufal.ic.p2.bikeshare.exception.aluguel.UsuarioInadimplenteException;
 import br.ufal.ic.p2.bikeshare.plano.FabricaPlano;
 import br.ufal.ic.p2.bikeshare.plano.Plano;
 import br.ufal.ic.p2.bikeshare.util.Dinheiro;
@@ -34,8 +35,9 @@ public abstract class Usuario implements Serializable {
     private Plano plano;
     private MetodoPagamento metodoPagamento;
     private PagamentoSaldoPreCarregado saldoPreCarregado;
-    private final EstadoUsuario estado;
+    private EstadoUsuario estado;
     private String aluguelAtivoId;
+    private BigDecimal totalPendencias = BigDecimal.ZERO;
 
     protected Usuario(String id, String nome, String email, String senha, Plano plano) {
         this.id = id;
@@ -93,7 +95,30 @@ public abstract class Usuario implements Serializable {
         this.aluguelAtivoId = null;
     }
 
+    public void cobrar(BigDecimal valor) {
+        if (valor.signum() > 0
+                && "saldoPreCarregado".equals(metodoPagamento.getNome())) {
+            metodoPagamento.debitarSaldo(valor);
+        }
+    }
+
+    public void validarSaldo(BigDecimal valor) {
+        if ("saldoPreCarregado".equals(metodoPagamento.getNome())
+                && !metodoPagamento.possuiSaldo(valor)) {
+            throw new SaldoInsuficienteException();
+        }
+    }
+
+    public void marcarInadimplente() {
+        this.estado = EstadoUsuario.INADIMPLENTE;
+        this.totalPendencias = this.totalPendencias.add(new BigDecimal("10.00"));
+        this.aluguelAtivoId = null;
+    }
+
     public void validarMetodoPagamentoParaRetirada() {
+        if (estado == EstadoUsuario.INADIMPLENTE) {
+            throw new UsuarioInadimplenteException();
+        }
         String nome = metodoPagamento.getNome();
         if ("nenhum".equals(nome)) {
             throw new MetodoPagamentoNaoCadastradoException();
@@ -148,7 +173,7 @@ public abstract class Usuario implements Serializable {
             case "aluguelAtivo":
                 return aluguelAtivoId == null ? "nenhum" : aluguelAtivoId;
             case "totalPendencias":
-                return Dinheiro.formatar(BigDecimal.ZERO);
+                return Dinheiro.formatar(totalPendencias);
             case "metodoPagamento":
                 return metodoPagamento.getNome();
             case "cpf":

@@ -4,6 +4,7 @@ import br.ufal.ic.p2.bikeshare.exception.pagamento.UsuarioNaoUsaSaldoPreCarregad
 import br.ufal.ic.p2.bikeshare.exception.validacao.AtributoNaoExisteException;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 public abstract class MetodoPagamento implements Serializable {
 
@@ -16,6 +17,14 @@ public abstract class MetodoPagamento implements Serializable {
     }
 
     public void adicionarSaldo(String valor) {
+        throw new UsuarioNaoUsaSaldoPreCarregadoException();
+    }
+
+    public boolean possuiSaldo(BigDecimal valor) {
+        return false;
+    }
+
+    public void debitarSaldo(BigDecimal valor) {
         throw new UsuarioNaoUsaSaldoPreCarregadoException();
     }
 }
