@@ -16,8 +16,8 @@ public class RepositorioAlugueis implements Serializable {
     private final Map<String, Aluguel> alugueis = new LinkedHashMap<>();
     private final GeradorId geradorId = new GeradorId("A");
 
-    public Aluguel cadastrar(String usuarioId, String bicicletaId,
-                             String estacaoOrigemId, String data) {
+    Aluguel cadastrar(String usuarioId, String bicicletaId,
+                      String estacaoOrigemId, String data) {
         Aluguel aluguel = new Aluguel(
                 geradorId.proximo(), usuarioId, bicicletaId, estacaoOrigemId, data);
         alugueis.put(aluguel.getId(), aluguel);
@@ -25,7 +25,7 @@ public class RepositorioAlugueis implements Serializable {
         return aluguel;
     }
 
-    public Aluguel buscar(String id) {
+    Aluguel buscar(String id) {
         Validador.exigirTexto(id, IdentificacaoAluguelNulaException::new);
         Aluguel aluguel = alugueis.get(id);
         if (aluguel == null) {

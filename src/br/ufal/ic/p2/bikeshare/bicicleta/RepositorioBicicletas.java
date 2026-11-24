@@ -11,6 +11,7 @@ import br.ufal.ic.p2.bikeshare.exception.bicicleta.IdentificacaoBicicletaNulaExc
 import br.ufal.ic.p2.bikeshare.util.Validador;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -25,15 +26,15 @@ public class RepositorioBicicletas implements Serializable {
         this.estacoes = estacoes;
     }
 
-    public Bicicleta cadastrar(String estacaoId, String bicicletaId, String tipo) {
-        return cadastrarConvencionalOuEletrica(estacaoId, bicicletaId, tipo, null);
+    public void cadastrar(String estacaoId, String bicicletaId, String tipo) {
+        cadastrarConvencionalOuEletrica(estacaoId, bicicletaId, tipo, null);
     }
 
-    public Bicicleta cadastrar(String estacaoId, String bicicletaId, String tipo, String nivelBateria) {
-        return cadastrarConvencionalOuEletrica(estacaoId, bicicletaId, tipo, nivelBateria);
+    public void cadastrar(String estacaoId, String bicicletaId, String tipo, String nivelBateria) {
+        cadastrarConvencionalOuEletrica(estacaoId, bicicletaId, tipo, nivelBateria);
     }
 
-    private Bicicleta cadastrarConvencionalOuEletrica(
+    private void cadastrarConvencionalOuEletrica(
             String estacaoId, String bicicletaId, String tipo, String nivelBateria) {
         Estacao estacao = estacoes.buscar(estacaoId);
         Validador.exigirTexto(bicicletaId, IdentificacaoBicicletaNulaException::new);
@@ -49,10 +50,9 @@ public class RepositorioBicicletas implements Serializable {
         }
 
         bicicletas.put(bicicletaId, bicicleta);
-        return bicicleta;
     }
 
-    public Bicicleta buscar(String id) {
+    private Bicicleta buscar(String id) {
         Validador.exigirTexto(id, IdentificacaoBicicletaNulaException::new);
         Bicicleta bicicleta = bicicletas.get(id);
         if (bicicleta == null) {
@@ -63,14 +63,11 @@ public class RepositorioBicicletas implements Serializable {
 
     public void remover(String estacaoId, String bicicletaId) {
         Estacao estacao = estacoes.buscar(estacaoId);
-        Bicicleta bicicleta = buscar(bicicletaId);
-        if (!bicicleta.getEstacaoId().equals(estacao.getId())) {
-            throw new BicicletaNaoEstaNestaEstacaoException();
-        }
+        validarNaEstacao(bicicletaId, estacao.getId());
         bicicletas.remove(bicicletaId);
     }
 
-    public Bicicleta retirar(String estacaoId, String bicicletaId) {
+    public void retirar(String estacaoId, String bicicletaId) {
         Estacao estacao = estacoes.buscar(estacaoId);
         Bicicleta bicicleta = buscar(bicicletaId);
         if (bicicleta.getEstacaoId() == null
@@ -79,7 +76,34 @@ public class RepositorioBicicletas implements Serializable {
         }
         bicicleta.exigirNivelParaRetirada();
         bicicleta.retirar();
-        return bicicleta;
+    }
+
+    public void validarNivelParaRetirada(String bicicletaId) {
+        buscar(bicicletaId).exigirNivelParaRetirada();
+    }
+
+    public void validarExiste(String bicicletaId) {
+        buscar(bicicletaId);
+    }
+
+    public void validarNaEstacao(String bicicletaId, String estacaoId) {
+        Bicicleta bicicleta = buscar(bicicletaId);
+        if (bicicleta.getEstacaoId() == null
+                || !bicicleta.getEstacaoId().equals(estacaoId)) {
+            throw new BicicletaNaoEstaNestaEstacaoException();
+        }
+    }
+
+    public BigDecimal getAdicionalPorMinuto(String bicicletaId) {
+        return buscar(bicicletaId).getAdicionalPorMinuto();
+    }
+
+    public String getAtributo(String bicicletaId, String atributo) {
+        return buscar(bicicletaId).getAtributo(atributo);
+    }
+
+    public String getEstado(String bicicletaId) {
+        return buscar(bicicletaId).getEstado();
     }
 
     public void validarDevolucao(String estacaoId) {

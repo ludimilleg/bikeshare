@@ -20,15 +20,18 @@ public class RepositorioUsuarios implements Serializable {
     private final Map<String, Usuario> usuarios = new LinkedHashMap<>();
     private final GeradorId geradorId = new GeradorId("U");
 
-    public Usuario cadastrar(Function<String, Usuario> criador) {
+    public RepositorioUsuarios() {
+    }
+
+    String cadastrar(Function<String, Usuario> criador) {
         Usuario usuario = criador.apply(geradorId.proximo());
         exigirEmailDisponivel(usuario.getEmail(), null);
         usuarios.put(usuario.getId(), usuario);
         geradorId.confirmarUso();
-        return usuario;
+        return usuario.getId();
     }
 
-    public Usuario buscar(String id) {
+    Usuario buscar(String id) {
         Validador.exigirTexto(id, IdentificacaoUsuarioNulaException::new);
         Usuario usuario = usuarios.get(id);
         if (usuario == null) {
@@ -37,7 +40,7 @@ public class RepositorioUsuarios implements Serializable {
         return usuario;
     }
 
-    public void remover(String id) {
+    void remover(String id) {
         Usuario usuario = buscar(id);
         if (usuario.getAluguelAtivoId() != null) {
             throw new NaoEPossivelRemoverUsuarioComAluguelException();
@@ -45,15 +48,16 @@ public class RepositorioUsuarios implements Serializable {
         usuarios.remove(usuario.getId());
     }
 
-    public Usuario buscarPorEmail(String email) {
+    String buscarIdPorEmail(String email) {
         Validador.exigirTexto(email, EmailNuloException::new);
         return usuarios.values().stream()
                 .filter(usuario -> usuario.getEmail().equalsIgnoreCase(email))
+                .map(Usuario::getId)
                 .findFirst()
                 .orElseThrow(UsuarioNaoExisteException::new);
     }
 
-    public void alterarEmail(Usuario usuario, String email) {
+    void alterarEmail(Usuario usuario, String email) {
         String emailValidado = Usuario.validarEmail(email);
         exigirEmailDisponivel(emailValidado, usuario.getId());
         usuario.alterarEmailValidado(emailValidado);

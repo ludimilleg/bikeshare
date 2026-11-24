@@ -1,14 +1,12 @@
 package br.ufal.ic.p2.bikeshare.aluguel;
 
-import br.ufal.ic.p2.bikeshare.bicicleta.Bicicleta;
 import br.ufal.ic.p2.bikeshare.bicicleta.RepositorioBicicletas;
 import br.ufal.ic.p2.bikeshare.exception.aluguel.AluguelNaoEstaEmAndamentoException;
 import br.ufal.ic.p2.bikeshare.exception.aluguel.DataDevolucaoAnteriorException;
 import br.ufal.ic.p2.bikeshare.exception.aluguel.UsuarioJaPossuiAluguelException;
-import br.ufal.ic.p2.bikeshare.exception.bicicleta.BicicletaNaoEstaNestaEstacaoException;
 import br.ufal.ic.p2.bikeshare.estacao.RepositorioEstacoes;
 import br.ufal.ic.p2.bikeshare.usuario.RepositorioUsuarios;
-import br.ufal.ic.p2.bikeshare.usuario.Usuario;
+import br.ufal.ic.p2.bikeshare.usuario.ServicoUsuarios;
 import br.ufal.ic.p2.bikeshare.util.ConfiguracaoBikeshare;
 
 import java.io.Serializable;
@@ -24,6 +22,7 @@ public class ServicoAluguel implements Serializable {
     private final RepositorioEstacoes estacoes;
     private final RepositorioBicicletas bicicletas;
     private final RepositorioAlugueis alugueis;
+    private ServicoUsuarios servicoUsuarios;
 
     public ServicoAluguel(RepositorioUsuarios usuarios,
                           RepositorioEstacoes estacoes,
@@ -35,26 +34,30 @@ public class ServicoAluguel implements Serializable {
         this.alugueis = alugueis;
     }
 
+    private ServicoUsuarios getServicoUsuarios() {
+        if (servicoUsuarios == null) {
+            servicoUsuarios = new ServicoUsuarios(usuarios);
+        }
+        return servicoUsuarios;
+    }
+
     public String retirar(String usuarioId, String estacaoId,
                           String bicicletaId, String data) {
-        Usuario usuario = usuarios.buscar(usuarioId);
+        String aluguelAtivoId = getServicoUsuarios().getAluguelAtivoId(usuarioId);
         var estacao = estacoes.buscar(estacaoId);
-        var bicicleta = bicicletas.buscar(bicicletaId);
+        bicicletas.validarExiste(bicicletaId);
         Aluguel.lerData(data);
-        if (usuario.getAluguelAtivoId() != null) {
+        if (aluguelAtivoId != null) {
             throw new UsuarioJaPossuiAluguelException();
         }
-        if (bicicleta.getEstacaoId() == null
-                || !bicicleta.getEstacaoId().equals(estacao.getId())) {
-            throw new BicicletaNaoEstaNestaEstacaoException();
-        }
-        bicicleta.exigirNivelParaRetirada();
-        usuario.validarMetodoPagamentoParaRetirada();
+        bicicletas.validarNaEstacao(bicicletaId, estacao.getId());
+        bicicletas.validarNivelParaRetirada(bicicletaId);
+        getServicoUsuarios().validarMetodoPagamentoParaRetirada(usuarioId);
 
         Aluguel aluguel = alugueis.cadastrar(
                 usuarioId, bicicletaId, estacaoId, data);
         bicicletas.retirar(estacaoId, bicicletaId);
-        usuario.iniciarAluguel(aluguel.getId());
+        getServicoUsuarios().iniciarAluguel(usuarioId, aluguel.getId());
         return aluguel.getId();
     }
 
@@ -71,33 +74,36 @@ public class ServicoAluguel implements Serializable {
         }
         bicicletas.validarDevolucao(estacaoId);
 
-        Usuario usuario = usuarios.buscar(aluguel.getUsuarioId());
-        Bicicleta bicicleta = bicicletas.buscar(aluguel.getBicicletaId());
+        String usuarioId = aluguel.getUsuarioId();
+        String bicicletaId = aluguel.getBicicletaId();
+        getServicoUsuarios().getAluguelAtivoId(usuarioId);
+        bicicletas.validarExiste(bicicletaId);
         long minutos = Duration.between(aluguel.getInicio(), fim).toMinutes();
 
         if (minutos > ConfiguracaoBikeshare.TEMPO_MAXIMO_ALUGUEL_MINUTOS) {
             aluguel.expirar(estacaoId, fim);
-            bicicletas.enviarParaManutencao(bicicleta.getId());
-            usuario.marcarInadimplente();
+            bicicletas.enviarParaManutencao(bicicletaId);
+            getServicoUsuarios().marcarInadimplente(usuarioId);
             return;
         }
         if (minutos <= ConfiguracaoBikeshare.PRAZO_CARENCIA_MINUTOS
                 && estacaoId.equals(aluguel.getEstacaoOrigemId())) {
             aluguel.cancelar(estacaoId, fim);
-            bicicletas.devolver(estacaoId, bicicleta.getId());
-            usuario.finalizarAluguel();
+            bicicletas.devolver(estacaoId, bicicletaId);
+            getServicoUsuarios().finalizarAluguel(usuarioId);
             return;
         }
 
-        BigDecimal valor = usuario.getPlano().calcularValor(minutos)
-                .add(bicicleta.getAdicionalPorMinuto()
+        BigDecimal valor = getServicoUsuarios()
+                .calcularValorPlano(usuarioId, minutos)
+                .add(bicicletas.getAdicionalPorMinuto(bicicletaId)
                         .multiply(BigDecimal.valueOf(minutos)));
 
-        usuario.validarSaldo(valor);
-        usuario.cobrar(valor);
+        getServicoUsuarios().validarSaldo(usuarioId, valor);
+        getServicoUsuarios().cobrar(usuarioId, valor);
         aluguel.finalizar(estacaoId, fim, valor);
-        bicicletas.devolver(estacaoId, bicicleta.getId());
-        usuario.finalizarAluguel();
+        bicicletas.devolver(estacaoId, bicicletaId);
+        getServicoUsuarios().finalizarAluguel(usuarioId);
     }
 
     public String getAtributoAluguel(String aluguelId, String atributo) {

@@ -3,16 +3,9 @@ package br.ufal.ic.p2.bikeshare;
 import br.ufal.ic.p2.bikeshare.aluguel.RepositorioAlugueis;
 import br.ufal.ic.p2.bikeshare.aluguel.ServicoAluguel;
 import br.ufal.ic.p2.bikeshare.bicicleta.RepositorioBicicletas;
-import br.ufal.ic.p2.bikeshare.exception.validacao.AtributoNaoPodeSerAlteradoException;
-import br.ufal.ic.p2.bikeshare.exception.pagamento.ValorMetodoPagamentoInvalidoException;
 import br.ufal.ic.p2.bikeshare.estacao.RepositorioEstacoes;
-import br.ufal.ic.p2.bikeshare.pagamento.FabricaMetodoPagamento;
-import br.ufal.ic.p2.bikeshare.plano.FabricaPlano;
 import br.ufal.ic.p2.bikeshare.usuario.RepositorioUsuarios;
-import br.ufal.ic.p2.bikeshare.usuario.TipoUsuario;
-import br.ufal.ic.p2.bikeshare.usuario.Usuario;
-import br.ufal.ic.p2.bikeshare.usuario.UsuarioPessoaFisica;
-import br.ufal.ic.p2.bikeshare.usuario.UsuarioPessoaJuridica;
+import br.ufal.ic.p2.bikeshare.usuario.ServicoUsuarios;
 
 import java.io.Serializable;
 
@@ -24,7 +17,15 @@ public class SistemaBikeshare implements Serializable {
     private final RepositorioEstacoes estacoes = new RepositorioEstacoes();
     private final RepositorioBicicletas bicicletas = new RepositorioBicicletas(estacoes);
     private final RepositorioAlugueis alugueis = new RepositorioAlugueis();
+    private ServicoUsuarios servicoUsuarios;
     private ServicoAluguel servicoAluguel;
+
+    private ServicoUsuarios getServicoUsuarios() {
+        if (servicoUsuarios == null) {
+            servicoUsuarios = new ServicoUsuarios(usuarios);
+        }
+        return servicoUsuarios;
+    }
 
     private ServicoAluguel getServicoAluguel() {
         if (servicoAluguel == null) {
@@ -36,97 +37,53 @@ public class SistemaBikeshare implements Serializable {
 
     public String cadastrarPessoaFisica(String nome, String email, String senha,
                                         String tipo, String cpf) {
-        return cadastrarPessoaFisica(nome, email, senha, tipo, cpf, FabricaPlano.PLANO_PADRAO, null);
+        return getServicoUsuarios().cadastrarPessoaFisica(nome, email, senha, tipo, cpf);
     }
 
     public String cadastrarPessoaFisica(String nome, String email, String senha,
                                         String tipo, String cpf, String plano, String mensalidade) {
-        TipoUsuario.PESSOA_FISICA.exigirIgual(tipo);
-        return usuarios.cadastrar(id -> new UsuarioPessoaFisica(
-                id, nome, email, senha, FabricaPlano.criar(plano, mensalidade), cpf)).getId();
+        return getServicoUsuarios().cadastrarPessoaFisica(
+                nome, email, senha, tipo, cpf, plano, mensalidade);
     }
 
     public String cadastrarPessoaJuridica(String nome, String email, String senha,
                                           String tipo, String cnpj, String razaoSocial) {
-        return cadastrarPessoaJuridica(nome, email, senha, tipo, cnpj, razaoSocial,
-                FabricaPlano.PLANO_PADRAO, null);
+        return getServicoUsuarios().cadastrarPessoaJuridica(
+                nome, email, senha, tipo, cnpj, razaoSocial);
     }
 
     public String cadastrarPessoaJuridica(String nome, String email, String senha, String tipo,
                                           String cnpj, String razaoSocial,
                                           String plano, String mensalidade) {
-        TipoUsuario.PESSOA_JURIDICA.exigirIgual(tipo);
-        return usuarios.cadastrar(id -> new UsuarioPessoaJuridica(
-                id, nome, email, senha, FabricaPlano.criar(plano, mensalidade), cnpj, razaoSocial)).getId();
+        return getServicoUsuarios().cadastrarPessoaJuridica(
+                nome, email, senha, tipo, cnpj, razaoSocial, plano, mensalidade);
     }
 
     public String getAtributoUsuario(String usuario, String atributo) {
-        return usuarios.buscar(usuario).getAtributo(atributo);
+        return getServicoUsuarios().getAtributo(usuario, atributo);
     }
 
     public String getUsuarioPorEmail(String email) {
-        return usuarios.buscarPorEmail(email).getId();
+        return getServicoUsuarios().getIdPorEmail(email);
     }
 
     public void removerUsuario(String id) {
-        usuarios.remover(id);
+        getServicoUsuarios().remover(id);
     }
 
     public void alterarUsuario(String id, String atributo, String valor) {
-        Usuario usuario = usuarios.buscar(id);
-        if (atributo == null) {
-            throw new AtributoNaoPodeSerAlteradoException();
-        }
-        switch (atributo) {
-            case "nome":
-                usuario.alterarNome(valor);
-                break;
-            case "email":
-                usuarios.alterarEmail(usuario, valor);
-                break;
-            case "senha":
-                usuario.alterarSenha(valor);
-                break;
-            case "plano":
-                usuario.alterarPlano(valor);
-                break;
-            case "metodoPagamento":
-                if (!"saldoPreCarregado".equals(valor)) {
-                    throw new ValorMetodoPagamentoInvalidoException();
-                }
-                usuario.ativarSaldoPreCarregado();
-                break;
-            case "saldo":
-                usuario.adicionarSaldo(valor);
-                break;
-            default:
-                throw new AtributoNaoPodeSerAlteradoException();
-        }
+        getServicoUsuarios().alterar(id, atributo, valor);
     }
 
     public void alterarUsuario(String id, String atributo, String metodo,
                                String numero, String validade) {
-        Usuario usuario = usuarios.buscar(id);
-        if (!"metodoPagamento".equals(atributo)) {
-            throw new AtributoNaoPodeSerAlteradoException();
-        }
-        if (!"cartao".equals(metodo)) {
-            throw new ValorMetodoPagamentoInvalidoException();
-        }
-        usuario.alterarMetodoPagamento(
-                FabricaMetodoPagamento.criarCartao(numero, validade));
+        getServicoUsuarios().alterarMetodoPagamento(
+                id, atributo, metodo, numero, validade);
     }
 
     public void alterarUsuario(String id, String atributo, String metodo, String chave) {
-        Usuario usuario = usuarios.buscar(id);
-        if (!"metodoPagamento".equals(atributo)) {
-            throw new AtributoNaoPodeSerAlteradoException();
-        }
-        if (!"pix".equals(metodo)) {
-            throw new ValorMetodoPagamentoInvalidoException();
-        }
-        usuario.alterarMetodoPagamento(
-                FabricaMetodoPagamento.criarPix(chave));
+        getServicoUsuarios().alterarMetodoPagamento(
+                id, atributo, metodo, chave);
     }
 
     public String cadastrarEstacao(String nome, String endereco, String capacidade) {
@@ -154,11 +111,11 @@ public class SistemaBikeshare implements Serializable {
     }
 
     public String getAtributoBicicleta(String bicicleta, String atributo) {
-        return bicicletas.buscar(bicicleta).getAtributo(atributo);
+        return bicicletas.getAtributo(bicicleta, atributo);
     }
 
     public String getEstadoBicicleta(String bicicleta) {
-        return bicicletas.buscar(bicicleta).getEstado();
+        return bicicletas.getEstado(bicicleta);
     }
 
     public String retirarBicicleta(String usuarioId, String estacaoId,
