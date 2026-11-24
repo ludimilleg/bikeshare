@@ -1,7 +1,9 @@
 package br.ufal.ic.p2.bikeshare;
 
-import br.ufal.ic.p2.bikeshare.bicicleta.Bicicleta;
+import br.ufal.ic.p2.bikeshare.aluguel.Aluguel;
+import br.ufal.ic.p2.bikeshare.aluguel.RepositorioAlugueis;
 import br.ufal.ic.p2.bikeshare.bicicleta.RepositorioBicicletas;
+import br.ufal.ic.p2.bikeshare.exception.aluguel.UsuarioJaPossuiAluguelException;
 import br.ufal.ic.p2.bikeshare.exception.validacao.AtributoNaoPodeSerAlteradoException;
 import br.ufal.ic.p2.bikeshare.exception.pagamento.ValorMetodoPagamentoInvalidoException;
 import br.ufal.ic.p2.bikeshare.estacao.RepositorioEstacoes;
@@ -23,6 +25,7 @@ public class SistemaBikeshare implements Serializable {
     private final RepositorioUsuarios usuarios = new RepositorioUsuarios();
     private RepositorioEstacoes estacoes;
     private RepositorioBicicletas bicicletas;
+    private RepositorioAlugueis alugueis;
 
     private RepositorioEstacoes getEstacoes() {
         if (estacoes == null) {
@@ -36,6 +39,13 @@ public class SistemaBikeshare implements Serializable {
             bicicletas = new RepositorioBicicletas(getEstacoes());
         }
         return bicicletas;
+    }
+
+    private RepositorioAlugueis getAlugueis() {
+        if (alugueis == null) {
+            alugueis = new RepositorioAlugueis();
+        }
+        return alugueis;
     }
 
     public String cadastrarPessoaFisica(String nome, String email, String senha,
@@ -161,5 +171,29 @@ public class SistemaBikeshare implements Serializable {
 
     public String getEstadoBicicleta(String bicicleta) {
         return getBicicletas().buscar(bicicleta).getEstado();
+    }
+
+    public String retirarBicicleta(String usuarioId, String estacaoId,
+                                   String bicicletaId, String data) {
+        Usuario usuario = usuarios.buscar(usuarioId);
+        getEstacoes().buscar(estacaoId);
+        getBicicletas().buscar(bicicletaId);
+        Aluguel.exigirDataValida(data);
+        if (usuario.getAluguelAtivoId() != null) {
+            throw new UsuarioJaPossuiAluguelException();
+        }
+
+        getBicicletas().validarRetirada(estacaoId, bicicletaId);
+        usuario.validarMetodoPagamentoParaRetirada();
+        getBicicletas().retirar(estacaoId, bicicletaId);
+
+        Aluguel aluguel = getAlugueis().cadastrar(
+                usuarioId, bicicletaId, estacaoId, data);
+        usuario.iniciarAluguel(aluguel.getId());
+        return aluguel.getId();
+    }
+
+    public String getAtributoAluguel(String aluguelId, String atributo) {
+        return getAlugueis().buscar(aluguelId).getAtributo(atributo);
     }
 }

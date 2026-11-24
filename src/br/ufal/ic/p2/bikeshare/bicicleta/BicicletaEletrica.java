@@ -1,6 +1,7 @@
 package br.ufal.ic.p2.bikeshare.bicicleta;
 
 import br.ufal.ic.p2.bikeshare.exception.bicicleta.NivelBateriaForaIntervaloException;
+import br.ufal.ic.p2.bikeshare.exception.bicicleta.NivelBateriaInsuficienteException;
 import br.ufal.ic.p2.bikeshare.exception.bicicleta.NivelBateriaNaoNumericoException;
 import br.ufal.ic.p2.bikeshare.exception.bicicleta.NivelBateriaNuloException;
 
@@ -43,5 +44,11 @@ public class BicicletaEletrica extends Bicicleta {
 
     public boolean estaDisponivel() {
         return super.estaDisponivel() && nivelBateria >= 15;
+    }
+
+    public void exigirNivelParaRetirada() {
+        if (nivelBateria < 15) {
+            throw new NivelBateriaInsuficienteException();
+        }
     }
 }

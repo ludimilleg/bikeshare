@@ -80,10 +80,33 @@ public class RepositorioBicicletas implements Serializable {
         bicicletas.remove(bicicletaId);
     }
 
+    public Bicicleta retirar(String estacaoId, String bicicletaId) {
+        Estacao estacao = estacoes.buscar(estacaoId);
+        Bicicleta bicicleta = buscar(bicicletaId);
+        if (bicicleta.getEstacaoId() == null
+                || !bicicleta.getEstacaoId().equals(estacao.getId())) {
+            throw new BicicletaNaoEstaNestaEstacaoException();
+        }
+        bicicleta.exigirNivelParaRetirada();
+        bicicleta.retirar();
+        return bicicleta;
+    }
+
+    public Bicicleta validarRetirada(String estacaoId, String bicicletaId) {
+        Estacao estacao = estacoes.buscar(estacaoId);
+        Bicicleta bicicleta = buscar(bicicletaId);
+        if (bicicleta.getEstacaoId() == null
+                || !bicicleta.getEstacaoId().equals(estacao.getId())) {
+            throw new BicicletaNaoEstaNestaEstacaoException();
+        }
+        bicicleta.exigirNivelParaRetirada();
+        return bicicleta;
+    }
+
     public int getBicicletasDisponiveis(String estacaoId) {
         Estacao estacao = estacoes.buscar(estacaoId);
         return (int) bicicletas.values().stream()
-                .filter(bicicleta -> bicicleta.getEstacaoId().equals(estacao.getId()))
+                .filter(bicicleta -> estacao.getId().equals(bicicleta.getEstacaoId()))
                 .filter(Bicicleta::estaDisponivel)
                 .count();
     }
@@ -95,7 +118,7 @@ public class RepositorioBicicletas implements Serializable {
 
     private int contarOcupadas(String estacaoId) {
         return (int) bicicletas.values().stream()
-                .filter(bicicleta -> bicicleta.getEstacaoId().equals(estacaoId))
+                .filter(bicicleta -> estacaoId.equals(bicicleta.getEstacaoId()))
                 .count();
     }
 }

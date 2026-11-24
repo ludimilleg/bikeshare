@@ -124,7 +124,7 @@ public class Facade {
     // =====================================================================
 
     public String retirarBicicleta(String usuario, String estacao, String bicicleta, String data) {
-        throw new UnsupportedOperationException(AINDA_NAO_IMPLEMENTADO);
+        return sistema.retirarBicicleta(usuario, estacao, bicicleta, data);
     }
 
     // =====================================================================
@@ -148,7 +148,7 @@ public class Facade {
     }
 
     public String getAtributoAluguel(String aluguel, String atributo) {
-        throw new UnsupportedOperationException(AINDA_NAO_IMPLEMENTADO);
+        return sistema.getAtributoAluguel(aluguel, atributo);
     }
 
     // =====================================================================

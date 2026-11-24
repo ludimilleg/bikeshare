@@ -4,6 +4,7 @@ import br.ufal.ic.p2.bikeshare.exception.usuario.EmailJaCadastradoException;
 import br.ufal.ic.p2.bikeshare.exception.usuario.EmailNuloException;
 import br.ufal.ic.p2.bikeshare.exception.usuario.IdentificacaoUsuarioNulaException;
 import br.ufal.ic.p2.bikeshare.exception.usuario.UsuarioNaoExisteException;
+import br.ufal.ic.p2.bikeshare.exception.aluguel.NaoEPossivelRemoverUsuarioComAluguelException;
 import br.ufal.ic.p2.bikeshare.util.GeradorId;
 import br.ufal.ic.p2.bikeshare.util.Validador;
 
@@ -38,6 +39,9 @@ public class RepositorioUsuarios implements Serializable {
 
     public void remover(String id) {
         Usuario usuario = buscar(id);
+        if (usuario.getAluguelAtivoId() != null) {
+            throw new NaoEPossivelRemoverUsuarioComAluguelException();
+        }
         usuarios.remove(usuario.getId());
     }
 

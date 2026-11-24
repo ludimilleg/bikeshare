@@ -10,6 +10,8 @@ import br.ufal.ic.p2.bikeshare.exception.validacao.AtributoNaoExisteException;
 import br.ufal.ic.p2.bikeshare.pagamento.MetodoPagamento;
 import br.ufal.ic.p2.bikeshare.pagamento.PagamentoSaldoPreCarregado;
 import br.ufal.ic.p2.bikeshare.pagamento.SemMetodoPagamento;
+import br.ufal.ic.p2.bikeshare.exception.aluguel.MetodoPagamentoNaoCadastradoException;
+import br.ufal.ic.p2.bikeshare.exception.aluguel.SaldoInsuficienteException;
 import br.ufal.ic.p2.bikeshare.plano.FabricaPlano;
 import br.ufal.ic.p2.bikeshare.plano.Plano;
 import br.ufal.ic.p2.bikeshare.util.Dinheiro;
@@ -33,6 +35,7 @@ public abstract class Usuario implements Serializable {
     private MetodoPagamento metodoPagamento;
     private PagamentoSaldoPreCarregado saldoPreCarregado;
     private final EstadoUsuario estado;
+    private String aluguelAtivoId;
 
     protected Usuario(String id, String nome, String email, String senha, Plano plano) {
         this.id = id;
@@ -78,6 +81,25 @@ public abstract class Usuario implements Serializable {
         metodoPagamento.adicionarSaldo(valor);
     }
 
+    public String getAluguelAtivoId() {
+        return aluguelAtivoId;
+    }
+
+    public void iniciarAluguel(String aluguelId) {
+        this.aluguelAtivoId = aluguelId;
+    }
+
+    public void validarMetodoPagamentoParaRetirada() {
+        String nome = metodoPagamento.getNome();
+        if ("nenhum".equals(nome)) {
+            throw new MetodoPagamentoNaoCadastradoException();
+        }
+        if ("saldoPreCarregado".equals(nome)
+                && !((PagamentoSaldoPreCarregado) metodoPagamento).possuiSaldo()) {
+            throw new SaldoInsuficienteException();
+        }
+    }
+
     void alterarEmailValidado(String email) {
         this.email = email;
     }
@@ -116,7 +138,7 @@ public abstract class Usuario implements Serializable {
             case "mensalidade":
                 return Dinheiro.formatar(plano.getMensalidade());
             case "aluguelAtivo":
-                return "nenhum";
+                return aluguelAtivoId == null ? "nenhum" : aluguelAtivoId;
             case "totalPendencias":
                 return Dinheiro.formatar(BigDecimal.ZERO);
             case "metodoPagamento":
