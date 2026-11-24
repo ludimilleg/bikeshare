@@ -10,6 +10,8 @@ import br.ufal.ic.p2.bikeshare.exception.validacao.AtributoNaoExisteException;
 import br.ufal.ic.p2.bikeshare.pagamento.MetodoPagamento;
 import br.ufal.ic.p2.bikeshare.pagamento.PagamentoSaldoPreCarregado;
 import br.ufal.ic.p2.bikeshare.pagamento.SemMetodoPagamento;
+import br.ufal.ic.p2.bikeshare.exception.aluguel.MetodoPagamentoNaoCadastradoException;
+import br.ufal.ic.p2.bikeshare.exception.aluguel.SaldoInsuficienteException;
 import br.ufal.ic.p2.bikeshare.plano.FabricaPlano;
 import br.ufal.ic.p2.bikeshare.plano.Plano;
 import br.ufal.ic.p2.bikeshare.util.Dinheiro;
@@ -85,6 +87,17 @@ public abstract class Usuario implements Serializable {
 
     public void iniciarAluguel(String aluguelId) {
         this.aluguelAtivoId = aluguelId;
+    }
+
+    public void validarMetodoPagamentoParaRetirada() {
+        String nome = metodoPagamento.getNome();
+        if ("nenhum".equals(nome)) {
+            throw new MetodoPagamentoNaoCadastradoException();
+        }
+        if ("saldoPreCarregado".equals(nome)
+                && !((PagamentoSaldoPreCarregado) metodoPagamento).possuiSaldo()) {
+            throw new SaldoInsuficienteException();
+        }
     }
 
     void alterarEmailValidado(String email) {

@@ -17,6 +17,10 @@ public class PagamentoSaldoPreCarregado extends MetodoPagamento {
 
     private BigDecimal saldo = BigDecimal.ZERO;
 
+    public boolean possuiSaldo() {
+        return saldo.signum() > 0;
+    }
+
     @Override
     public String getNome() {
         return "saldoPreCarregado";

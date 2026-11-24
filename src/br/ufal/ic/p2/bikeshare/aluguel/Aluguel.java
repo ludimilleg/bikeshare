@@ -33,6 +33,10 @@ public class Aluguel implements Serializable {
         this.inicio = validarData(data);
     }
 
+    public static void exigirDataValida(String data) {
+        validarData(data);
+    }
+
     private static LocalDateTime validarData(String data) {
         Validador.exigirTexto(data, DataNulaException::new);
         Matcher dados = PADRAO_DATA.matcher(data.trim());
