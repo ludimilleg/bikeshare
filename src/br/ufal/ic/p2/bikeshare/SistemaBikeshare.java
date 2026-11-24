@@ -1,6 +1,5 @@
 package br.ufal.ic.p2.bikeshare;
 
-import br.ufal.ic.p2.bikeshare.bicicleta.Bicicleta;
 import br.ufal.ic.p2.bikeshare.bicicleta.RepositorioBicicletas;
 import br.ufal.ic.p2.bikeshare.exception.validacao.AtributoNaoPodeSerAlteradoException;
 import br.ufal.ic.p2.bikeshare.exception.pagamento.ValorMetodoPagamentoInvalidoException;
