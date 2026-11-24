@@ -6,6 +6,7 @@ import br.ufal.ic.p2.bikeshare.exception.pagamento.ValorNuloException;
 import br.ufal.ic.p2.bikeshare.exception.pagamento.UsuarioNaoUsaCartaoException;
 import br.ufal.ic.p2.bikeshare.exception.pagamento.UsuarioNaoUsaPixException;
 import br.ufal.ic.p2.bikeshare.exception.validacao.AtributoNaoExisteException;
+import br.ufal.ic.p2.bikeshare.exception.aluguel.SaldoInsuficienteException;
 import br.ufal.ic.p2.bikeshare.util.Dinheiro;
 import br.ufal.ic.p2.bikeshare.util.Validador;
 
@@ -27,9 +28,30 @@ public class PagamentoSaldoPreCarregado extends MetodoPagamento {
 
     public void debitarSaldo(BigDecimal valor) {
         if (!possuiSaldo(valor)) {
-            throw new br.ufal.ic.p2.bikeshare.exception.aluguel.SaldoInsuficienteException();
+            throw new SaldoInsuficienteException();
         }
         saldo = saldo.subtract(valor);
+    }
+
+    @Override
+    public void validarMetodoPagamentoParaRetirada() {
+        if (!possuiSaldo()) {
+            throw new SaldoInsuficienteException();
+        }
+    }
+
+    @Override
+    public void validarSaldo(BigDecimal valor) {
+        if (!possuiSaldo(valor)) {
+            throw new SaldoInsuficienteException();
+        }
+    }
+
+    @Override
+    public void cobrar(BigDecimal valor) {
+        if (valor.signum() > 0) {
+            debitarSaldo(valor);
+        }
     }
 
     @Override

@@ -27,4 +27,13 @@ public abstract class MetodoPagamento implements Serializable {
     public void debitarSaldo(BigDecimal valor) {
         throw new UsuarioNaoUsaSaldoPreCarregadoException();
     }
+
+    public void validarMetodoPagamentoParaRetirada() {
+    }
+
+    public void validarSaldo(BigDecimal valor) {
+    }
+
+    public void cobrar(BigDecimal valor) {
+    }
 }

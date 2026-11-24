@@ -8,10 +8,8 @@ import br.ufal.ic.p2.bikeshare.exception.usuario.UsuarioNaoEhPessoaFisicaExcepti
 import br.ufal.ic.p2.bikeshare.exception.usuario.UsuarioNaoEhPessoaJuridicaException;
 import br.ufal.ic.p2.bikeshare.exception.validacao.AtributoNaoExisteException;
 import br.ufal.ic.p2.bikeshare.pagamento.MetodoPagamento;
-import br.ufal.ic.p2.bikeshare.pagamento.PagamentoSaldoPreCarregado;
 import br.ufal.ic.p2.bikeshare.pagamento.SemMetodoPagamento;
-import br.ufal.ic.p2.bikeshare.exception.aluguel.MetodoPagamentoNaoCadastradoException;
-import br.ufal.ic.p2.bikeshare.exception.aluguel.SaldoInsuficienteException;
+import br.ufal.ic.p2.bikeshare.pagamento.FabricaMetodoPagamento;
 import br.ufal.ic.p2.bikeshare.exception.aluguel.UsuarioInadimplenteException;
 import br.ufal.ic.p2.bikeshare.plano.FabricaPlano;
 import br.ufal.ic.p2.bikeshare.plano.Plano;
@@ -34,7 +32,7 @@ public abstract class Usuario implements Serializable {
     private String senha;
     private Plano plano;
     private MetodoPagamento metodoPagamento;
-    private PagamentoSaldoPreCarregado saldoPreCarregado;
+    private MetodoPagamento saldoPreCarregado;
     private EstadoUsuario estado;
     private String aluguelAtivoId;
     private BigDecimal totalPendencias = BigDecimal.ZERO;
@@ -74,7 +72,7 @@ public abstract class Usuario implements Serializable {
 
     public void ativarSaldoPreCarregado() {
         if (saldoPreCarregado == null) {
-            saldoPreCarregado = new PagamentoSaldoPreCarregado();
+            saldoPreCarregado = FabricaMetodoPagamento.criarSaldoPreCarregado();
         }
         metodoPagamento = saldoPreCarregado;
     }
@@ -96,17 +94,11 @@ public abstract class Usuario implements Serializable {
     }
 
     public void cobrar(BigDecimal valor) {
-        if (valor.signum() > 0
-                && "saldoPreCarregado".equals(metodoPagamento.getNome())) {
-            metodoPagamento.debitarSaldo(valor);
-        }
+        metodoPagamento.cobrar(valor);
     }
 
     public void validarSaldo(BigDecimal valor) {
-        if ("saldoPreCarregado".equals(metodoPagamento.getNome())
-                && !metodoPagamento.possuiSaldo(valor)) {
-            throw new SaldoInsuficienteException();
-        }
+        metodoPagamento.validarSaldo(valor);
     }
 
     public void marcarInadimplente() {
@@ -119,14 +111,7 @@ public abstract class Usuario implements Serializable {
         if (estado == EstadoUsuario.INADIMPLENTE) {
             throw new UsuarioInadimplenteException();
         }
-        String nome = metodoPagamento.getNome();
-        if ("nenhum".equals(nome)) {
-            throw new MetodoPagamentoNaoCadastradoException();
-        }
-        if ("saldoPreCarregado".equals(nome)
-                && !((PagamentoSaldoPreCarregado) metodoPagamento).possuiSaldo()) {
-            throw new SaldoInsuficienteException();
-        }
+        metodoPagamento.validarMetodoPagamentoParaRetirada();
     }
 
     void alterarEmailValidado(String email) {

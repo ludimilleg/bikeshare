@@ -7,8 +7,7 @@ import br.ufal.ic.p2.bikeshare.exception.aluguel.UsuarioJaPossuiAluguelException
 import br.ufal.ic.p2.bikeshare.exception.validacao.AtributoNaoPodeSerAlteradoException;
 import br.ufal.ic.p2.bikeshare.exception.pagamento.ValorMetodoPagamentoInvalidoException;
 import br.ufal.ic.p2.bikeshare.estacao.RepositorioEstacoes;
-import br.ufal.ic.p2.bikeshare.pagamento.PagamentoCartao;
-import br.ufal.ic.p2.bikeshare.pagamento.PagamentoPix;
+import br.ufal.ic.p2.bikeshare.pagamento.FabricaMetodoPagamento;
 import br.ufal.ic.p2.bikeshare.plano.FabricaPlano;
 import br.ufal.ic.p2.bikeshare.usuario.RepositorioUsuarios;
 import br.ufal.ic.p2.bikeshare.usuario.TipoUsuario;
@@ -112,7 +111,8 @@ public class SistemaBikeshare implements Serializable {
         if (!"cartao".equals(metodo)) {
             throw new ValorMetodoPagamentoInvalidoException();
         }
-        usuario.alterarMetodoPagamento(new PagamentoCartao(numero, validade));
+        usuario.alterarMetodoPagamento(
+                FabricaMetodoPagamento.criarCartao(numero, validade));
     }
 
     public void alterarUsuario(String id, String atributo, String metodo, String chave) {
@@ -123,7 +123,8 @@ public class SistemaBikeshare implements Serializable {
         if (!"pix".equals(metodo)) {
             throw new ValorMetodoPagamentoInvalidoException();
         }
-        usuario.alterarMetodoPagamento(new PagamentoPix(chave));
+        usuario.alterarMetodoPagamento(
+                FabricaMetodoPagamento.criarPix(chave));
     }
 
     public String cadastrarEstacao(String nome, String endereco, String capacidade) {
