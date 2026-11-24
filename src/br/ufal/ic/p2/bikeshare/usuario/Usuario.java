@@ -2,7 +2,7 @@ package br.ufal.ic.p2.bikeshare.usuario;
 
 import br.ufal.ic.p2.bikeshare.exception.usuario.EmailInvalidoException;
 import br.ufal.ic.p2.bikeshare.exception.usuario.EmailNuloException;
-import br.ufal.ic.p2.bikeshare.exception.usuario.NomeNuloException;
+import br.ufal.ic.p2.bikeshare.exception.validacao.NomeNuloException;
 import br.ufal.ic.p2.bikeshare.exception.usuario.SenhaNulaException;
 import br.ufal.ic.p2.bikeshare.exception.usuario.UsuarioNaoEhPessoaFisicaException;
 import br.ufal.ic.p2.bikeshare.exception.usuario.UsuarioNaoEhPessoaJuridicaException;
