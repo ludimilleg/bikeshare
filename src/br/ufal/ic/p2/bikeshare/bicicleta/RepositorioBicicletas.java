@@ -82,17 +82,6 @@ public class RepositorioBicicletas implements Serializable {
         return bicicleta;
     }
 
-    public Bicicleta validarRetirada(String estacaoId, String bicicletaId) {
-        Estacao estacao = estacoes.buscar(estacaoId);
-        Bicicleta bicicleta = buscar(bicicletaId);
-        if (bicicleta.getEstacaoId() == null
-                || !bicicleta.getEstacaoId().equals(estacao.getId())) {
-            throw new BicicletaNaoEstaNestaEstacaoException();
-        }
-        bicicleta.exigirNivelParaRetirada();
-        return bicicleta;
-    }
-
     public void validarDevolucao(String estacaoId) {
         Estacao estacao = estacoes.buscar(estacaoId);
         if (contarOcupadas(estacaoId) >= estacao.getCapacidade()) {

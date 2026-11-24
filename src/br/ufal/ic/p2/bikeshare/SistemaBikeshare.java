@@ -17,6 +17,7 @@ import br.ufal.ic.p2.bikeshare.usuario.UsuarioPessoaJuridica;
 import br.ufal.ic.p2.bikeshare.exception.aluguel.AluguelNaoEstaEmAndamentoException;
 import br.ufal.ic.p2.bikeshare.exception.aluguel.DataDevolucaoAnteriorException;
 import br.ufal.ic.p2.bikeshare.bicicleta.Bicicleta;
+import br.ufal.ic.p2.bikeshare.exception.bicicleta.BicicletaNaoEstaNestaEstacaoException;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -162,14 +163,18 @@ public class SistemaBikeshare implements Serializable {
     public String retirarBicicleta(String usuarioId, String estacaoId,
                                    String bicicletaId, String data) {
         Usuario usuario = usuarios.buscar(usuarioId);
-        estacoes.buscar(estacaoId);
-        bicicletas.buscar(bicicletaId);
+        var estacao = estacoes.buscar(estacaoId);
+        var bicicleta = bicicletas.buscar(bicicletaId);
         Aluguel.exigirDataValida(data);
         if (usuario.getAluguelAtivoId() != null) {
             throw new UsuarioJaPossuiAluguelException();
         }
 
-        bicicletas.validarRetirada(estacaoId, bicicletaId);
+        if (bicicleta.getEstacaoId() == null
+                || !bicicleta.getEstacaoId().equals(estacao.getId())) {
+            throw new BicicletaNaoEstaNestaEstacaoException();
+        }
+        bicicleta.exigirNivelParaRetirada();
         usuario.validarMetodoPagamentoParaRetirada();
         bicicletas.retirar(estacaoId, bicicletaId);
 
