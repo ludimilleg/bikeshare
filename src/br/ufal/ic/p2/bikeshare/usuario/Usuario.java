@@ -33,6 +33,7 @@ public abstract class Usuario implements Serializable {
     private MetodoPagamento metodoPagamento;
     private PagamentoSaldoPreCarregado saldoPreCarregado;
     private final EstadoUsuario estado;
+    private String aluguelAtivoId;
 
     protected Usuario(String id, String nome, String email, String senha, Plano plano) {
         this.id = id;
@@ -78,6 +79,14 @@ public abstract class Usuario implements Serializable {
         metodoPagamento.adicionarSaldo(valor);
     }
 
+    public String getAluguelAtivoId() {
+        return aluguelAtivoId;
+    }
+
+    public void iniciarAluguel(String aluguelId) {
+        this.aluguelAtivoId = aluguelId;
+    }
+
     void alterarEmailValidado(String email) {
         this.email = email;
     }
@@ -116,7 +125,7 @@ public abstract class Usuario implements Serializable {
             case "mensalidade":
                 return Dinheiro.formatar(plano.getMensalidade());
             case "aluguelAtivo":
-                return "nenhum";
+                return aluguelAtivoId == null ? "nenhum" : aluguelAtivoId;
             case "totalPendencias":
                 return Dinheiro.formatar(BigDecimal.ZERO);
             case "metodoPagamento":

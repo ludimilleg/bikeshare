@@ -12,7 +12,7 @@ public abstract class Bicicleta implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final String id;
-    private final String estacaoId;
+    private String estacaoId;
     private String estado = "disponivel";
 
     protected Bicicleta(String id, String estacaoId) {
@@ -26,6 +26,14 @@ public abstract class Bicicleta implements Serializable {
 
     public String getEstacaoId() {
         return estacaoId;
+    }
+
+    public void retirar() {
+        this.estado = "emUso";
+        this.estacaoId = null;
+    }
+
+    public void exigirNivelParaRetirada() {
     }
 
     public String getEstado() {
@@ -48,7 +56,7 @@ public abstract class Bicicleta implements Serializable {
             case "estado":
                 return getEstado();
             case "estacao":
-                return getEstacaoId();
+                return getEstacaoId() == null ? "nenhuma" : getEstacaoId();
             case "nivelBateria":
                 return String.valueOf(getNivelBateria());
             default:
