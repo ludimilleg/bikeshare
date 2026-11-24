@@ -41,10 +41,6 @@ public class Aluguel implements Serializable {
         this.inicio = validarData(data);
     }
 
-    public static void exigirDataValida(String data) {
-        validarData(data);
-    }
-
     public static LocalDateTime lerData(String data) {
         return validarData(data);
     }

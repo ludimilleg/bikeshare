@@ -165,7 +165,7 @@ public class SistemaBikeshare implements Serializable {
         Usuario usuario = usuarios.buscar(usuarioId);
         var estacao = estacoes.buscar(estacaoId);
         var bicicleta = bicicletas.buscar(bicicletaId);
-        Aluguel.exigirDataValida(data);
+        Aluguel.lerData(data);
         if (usuario.getAluguelAtivoId() != null) {
             throw new UsuarioJaPossuiAluguelException();
         }
@@ -191,13 +191,12 @@ public class SistemaBikeshare implements Serializable {
     public void devolverBicicleta(String aluguelId, String estacaoId, String data) {
         Aluguel aluguel = alugueis.buscar(aluguelId);
         estacoes.buscar(estacaoId);
-        Aluguel.exigirDataValida(data);
+        LocalDateTime fim = Aluguel.lerData(data);
 
         if (!"emAndamento".equals(aluguel.getEstado())) {
             throw new AluguelNaoEstaEmAndamentoException();
         }
 
-        LocalDateTime fim = Aluguel.lerData(data);
         if (fim.isBefore(aluguel.getInicio())) {
             throw new DataDevolucaoAnteriorException();
         }
