@@ -1,9 +1,5 @@
 package br.ufal.ic.p2.bikeshare;
 
-import br.ufal.ic.p2.bikeshare.persistencia.ArmazenamentoSistema;
-
-import java.nio.file.Paths;
-
 /**
  Facade
  */
@@ -11,12 +7,7 @@ public class Facade {
 
     private static final String AINDA_NAO_IMPLEMENTADO = "Ainda não implementado.";
 
-    private static final String ARQUIVO_DADOS = "bikeshare_data.ser";
-
-    private final ArmazenamentoSistema armazenamento =
-            new ArmazenamentoSistema(Paths.get(ARQUIVO_DADOS));
-
-    private SistemaBikeshare sistema = armazenamento.carregar();
+    private final SistemaBikeshare sistema = SistemaBikeshare.carregar();
 
     // =====================================================================
     // US1 - Cadastro de usuario
@@ -205,10 +196,10 @@ public class Facade {
     // =====================================================================
 
     public void zerarSistema() {
-        sistema = new SistemaBikeshare();
+        sistema.zerarSistema();
     }
 
     public void encerrarSistema() {
-        armazenamento.salvar(sistema);
+        sistema.encerrarSistema();
     }
 }

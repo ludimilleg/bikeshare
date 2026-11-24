@@ -4,21 +4,50 @@ import br.ufal.ic.p2.bikeshare.aluguel.RepositorioAlugueis;
 import br.ufal.ic.p2.bikeshare.aluguel.ServicoAluguel;
 import br.ufal.ic.p2.bikeshare.bicicleta.RepositorioBicicletas;
 import br.ufal.ic.p2.bikeshare.estacao.RepositorioEstacoes;
+import br.ufal.ic.p2.bikeshare.persistencia.ArmazenamentoSistema;
 import br.ufal.ic.p2.bikeshare.usuario.RepositorioUsuarios;
 import br.ufal.ic.p2.bikeshare.usuario.ServicoUsuarios;
 
 import java.io.Serializable;
+import java.nio.file.Paths;
 
 public class SistemaBikeshare implements Serializable {
 
     private static final long serialVersionUID = 2656971213220932395L;
+    private static final ArmazenamentoSistema ARMAZENAMENTO =
+            new ArmazenamentoSistema(Paths.get("bikeshare_data.ser"));
 
-    private final RepositorioUsuarios usuarios = new RepositorioUsuarios();
-    private final RepositorioEstacoes estacoes = new RepositorioEstacoes();
-    private final RepositorioBicicletas bicicletas = new RepositorioBicicletas(estacoes);
-    private final RepositorioAlugueis alugueis = new RepositorioAlugueis();
+    private RepositorioUsuarios usuarios;
+    private RepositorioEstacoes estacoes;
+    private RepositorioBicicletas bicicletas;
+    private RepositorioAlugueis alugueis;
     private ServicoUsuarios servicoUsuarios;
     private ServicoAluguel servicoAluguel;
+
+    public SistemaBikeshare() {
+        inicializarEstado();
+    }
+
+    public static SistemaBikeshare carregar() {
+        return ARMAZENAMENTO.carregar();
+    }
+
+    public void zerarSistema() {
+        inicializarEstado();
+    }
+
+    public void encerrarSistema() {
+        ARMAZENAMENTO.salvar(this);
+    }
+
+    private void inicializarEstado() {
+        usuarios = new RepositorioUsuarios();
+        estacoes = new RepositorioEstacoes();
+        bicicletas = new RepositorioBicicletas(estacoes);
+        alugueis = new RepositorioAlugueis();
+        servicoUsuarios = null;
+        servicoAluguel = null;
+    }
 
     private ServicoUsuarios getServicoUsuarios() {
         if (servicoUsuarios == null) {
