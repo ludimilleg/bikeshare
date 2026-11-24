@@ -109,11 +109,11 @@ public class Facade {
     // =====================================================================
 
     public String getBicicletasDisponiveis(String estacao) {
-        return String.valueOf(sistema.getBicicletasDisponiveis(estacao));
+        return sistema.getBicicletasDisponiveis(estacao);
     }
 
     public String getVagasDisponiveis(String estacao) {
-        return String.valueOf(sistema.getVagasDisponiveis(estacao));
+        return sistema.getVagasDisponiveis(estacao);
     }
 
     public String getEstadoBicicleta(String bicicleta) {

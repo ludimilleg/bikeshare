@@ -133,12 +133,12 @@ public class SistemaBikeshare implements Serializable {
         return estacoes.cadastrar(nome, endereco, capacidade).getId();
     }
 
-    public int getVagasDisponiveis(String estacao) {
-        return bicicletas.getVagasDisponiveis(estacao);
+    public String getVagasDisponiveis(String estacao) {
+        return String.valueOf(bicicletas.getVagasDisponiveis(estacao));
     }
 
-    public int getBicicletasDisponiveis(String estacao) {
-        return bicicletas.getBicicletasDisponiveis(estacao);
+    public String getBicicletasDisponiveis(String estacao) {
+        return String.valueOf(bicicletas.getBicicletasDisponiveis(estacao));
     }
 
     public void adicionarBicicleta(String estacao, String bicicleta, String tipo) {
