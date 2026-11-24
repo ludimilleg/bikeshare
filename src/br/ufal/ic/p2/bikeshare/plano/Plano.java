@@ -8,4 +8,6 @@ public abstract class Plano implements Serializable {
     public abstract String getNome();
 
     public abstract BigDecimal getMensalidade();
+
+    public abstract BigDecimal calcularValor(long minutos);
 }

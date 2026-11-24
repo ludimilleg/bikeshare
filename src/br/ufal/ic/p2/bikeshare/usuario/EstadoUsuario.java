@@ -1,7 +1,8 @@
 package br.ufal.ic.p2.bikeshare.usuario;
 
 public enum EstadoUsuario {
-    ATIVO("ativo");
+    ATIVO("ativo"),
+    INADIMPLENTE("inadimplente");
 
     private final String nome;
 

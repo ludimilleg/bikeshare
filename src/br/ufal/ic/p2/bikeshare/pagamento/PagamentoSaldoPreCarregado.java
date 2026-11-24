@@ -21,6 +21,17 @@ public class PagamentoSaldoPreCarregado extends MetodoPagamento {
         return saldo.signum() > 0;
     }
 
+    public boolean possuiSaldo(BigDecimal valor) {
+        return saldo.compareTo(valor) >= 0;
+    }
+
+    public void debitarSaldo(BigDecimal valor) {
+        if (!possuiSaldo(valor)) {
+            throw new br.ufal.ic.p2.bikeshare.exception.aluguel.SaldoInsuficienteException();
+        }
+        saldo = saldo.subtract(valor);
+    }
+
     @Override
     public String getNome() {
         return "saldoPreCarregado";
