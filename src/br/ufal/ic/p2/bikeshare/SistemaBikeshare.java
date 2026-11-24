@@ -177,10 +177,10 @@ public class SistemaBikeshare implements Serializable {
         }
         bicicleta.exigirNivelParaRetirada();
         usuario.validarMetodoPagamentoParaRetirada();
-        bicicletas.retirar(estacaoId, bicicletaId);
 
         Aluguel aluguel = alugueis.cadastrar(
                 usuarioId, bicicletaId, estacaoId, data);
+        bicicletas.retirar(estacaoId, bicicletaId);
         usuario.iniciarAluguel(aluguel.getId());
         return aluguel.getId();
     }

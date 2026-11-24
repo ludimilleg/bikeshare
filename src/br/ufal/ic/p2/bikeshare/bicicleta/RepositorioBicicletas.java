@@ -90,7 +90,6 @@ public class RepositorioBicicletas implements Serializable {
     }
 
     public void devolver(String estacaoId, String bicicletaId) {
-        validarDevolucao(estacaoId);
         Bicicleta bicicleta = buscar(bicicletaId);
         bicicleta.devolver(estacaoId);
     }
